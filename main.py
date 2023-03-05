@@ -21,7 +21,7 @@ LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
 # WINDOW_MARGIN = LINE_WIDTH
 
-truckImg = pygame.image.load('./static/truck.png')
+truckImg = pygame.image.load('./static/truck2.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
 # cellMAP = np.random.randint(1, size=(16, 16))

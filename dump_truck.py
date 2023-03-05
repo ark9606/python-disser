@@ -17,7 +17,7 @@ class DumpTruck:
         self.X = X
         self.Y = Y
         self.img = img
-        self.look = RIGHT
+        self.look = LEFT
         print('init look ', self.look)
 
     def set_data(self, gridOrigin):
