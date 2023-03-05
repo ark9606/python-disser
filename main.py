@@ -4,32 +4,51 @@ from pygame.locals import KEYDOWN, K_q, K_ESCAPE
 import numpy as np
 import time
 import threading as th
+import constants as const
 import dump_truck
 
 
 
-SCREENSIZE = WIDTH, HEIGHT = 1024, 768
-BLACK = (0, 0, 0)
-GREY = (230, 230, 230)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-CELL_SIZE = 40
+# SCREENSIZE = WIDTH, HEIGHT = 1024, 768
+BLACK = const.BLACK
+GREY = const.GREY
+# GREY = (230, 230, 230)
+# GREEN = (0, 255, 0)
+# RED = (255, 0, 0)
+CELL_SIZE = const.CELL_SIZE
 
-LINE_WIDTH = 2
-LINE_COLOR = BLACK
-WINDOW_MARGIN = LINE_WIDTH
+LINE_WIDTH = const.LINE_WIDTH
+LINE_COLOR = const.LINE_COLOR
+# WINDOW_MARGIN = LINE_WIDTH
 
+truckImg = pygame.image.load('./static/truck.png')
+truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
 # cellMAP = np.random.randint(1, size=(16, 16))
-cellMAP = [[None] * 16] * 16
-# GRID_CELLS = cellMAP.shape[0]
-GRID_CELLS = len(cellMAP)
+cellMAP = [
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+]
+GRID_CELLS = const.GRID_CELLS
+GRID_ORIGIN = const.GRID_ORIGIN
+# GRID_SIZE = GRID_CELLS * CELL_SIZE
+# GRID_ORIGIN = (WIDTH / 2 - GRID_SIZE / 2, WINDOW_MARGIN)
+CELL_MARGIN = const.CELL_MARGIN
 
-# GRID_SIZE = (WIDTH if WIDTH < HEIGHT else HEIGHT) - LINE_WIDTH * 2
-GRID_SIZE = GRID_CELLS * CELL_SIZE
-GRID_ORIGIN = (WIDTH / 2 - GRID_SIZE / 2, WINDOW_MARGIN)
-
-CELL_MARGIN = LINE_WIDTH * 2
 # CELL_SIZE = (GRID_SIZE / GRID_CELLS) - (CELL_MARGIN * 2)
 
 _VARS = {
@@ -51,20 +70,25 @@ def updateState():
 
 def main():
   pygame.init()
-  _VARS['surf'] = pygame.display.set_mode(SCREENSIZE)
+  _VARS['surf'] = pygame.display.set_mode(const.SCREENSIZE)
   
   # sets all rows in column with truck
-  truck = dump_truck.DumpTruck(1, 2)
-  _VARS['map'][1][2] = truck
+  truck = dump_truck.DumpTruck(5, 7, truckImg)
+  truck.set_data(GRID_ORIGIN)
+  _VARS['map'][5][7] = truck
+
+  truck1 = dump_truck.DumpTruck(10, 8, truckImg)
+  truck1.set_data(GRID_ORIGIN)
+  _VARS['map'][10][8] = truck1
 
   while True:
     checkEvents()
-    _VARS['surf'].fill(GREY)
-    drawSquareGrid(GRID_ORIGIN, GRID_SIZE, GRID_CELLS)
+    _VARS['surf'].fill(const.GREY)
+    drawSquareGrid(GRID_ORIGIN, const.GRID_SIZE, GRID_CELLS)
     fillCells()
     pygame.display.update()
-    updateState()
-    pygame.time.delay(500)
+    # updateState()
+    pygame.time.delay(1000)
 
 
 # NEW METHOD FOR ADDING CELLS :
@@ -77,15 +101,24 @@ def fillCells():
           if not obj:
             continue
 
-          fill = GREY
-          if obj.get_code() == 1:
-            fill = BLACK
-          elif obj.get_code() == 2:
-            fill = RED
+          obj.draw(_VARS['surf'])
+          obj.update_state()
+
+          # X = GRID_ORIGIN[0] + (CELL_SIZE * row) + CELL_MARGIN + LINE_WIDTH / 2
+          # Y = GRID_ORIGIN[1] + (CELL_SIZE * column) + CELL_MARGIN + LINE_WIDTH / 2
+          # fill = GREY
+          # if obj.get_code() == const.GRID_CODE_TRUCK:
+          #   fill = BLACK
+          #   X = GRID_ORIGIN[0] + (CELL_SIZE * row)
+          #   Y = GRID_ORIGIN[1] + (CELL_SIZE * column)
+          #   _VARS['surf'].blit(truckImg, (X, Y))
+
+
+          # elif obj.get_code() == 2:
+          #   fill = RED
           
-          X = GRID_ORIGIN[0] + (CELL_SIZE * row) + CELL_MARGIN + LINE_WIDTH / 2
-          Y = GRID_ORIGIN[1] + (CELL_SIZE * column) + CELL_MARGIN + LINE_WIDTH / 2
-          drawSquareCell(X, Y, CELL_SIZE - CELL_MARGIN * 2, CELL_SIZE - CELL_MARGIN * 2, fill)
+
+          # drawSquareCell(X, Y, CELL_SIZE - CELL_MARGIN * 2, CELL_SIZE - CELL_MARGIN * 2, fill)
 
 
 # Draw filled rectangle at coordinates
