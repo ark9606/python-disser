@@ -6,7 +6,7 @@ import time
 import threading as th
 import constants as const
 import dump_truck
-
+import time
 
 
 # SCREENSIZE = WIDTH, HEIGHT = 1024, 768
@@ -53,11 +53,12 @@ CELL_MARGIN = const.CELL_MARGIN
 
 _VARS = {
   'surf': False,
+  'simulationThread': False,
   'gridCells': GRID_CELLS,
-  'map': cellMAP
+  'map': cellMAP,
+  'exited': False
 }
-timer = False
-quited = False
+exited = False
 
 def updateState():
   # _VARS['map'] = np.random.randint(3, size=(16, 16))
@@ -66,6 +67,22 @@ def updateState():
   print('tick')
   print(_VARS['map'])
 
+def run_simulation(ex):
+  iterations = 0
+  while True:
+    time.sleep(0.250)
+    checkEvents()
+    # if ex:
+      # break
+
+    for row in range(GRID_CELLS):
+      for column in range(GRID_CELLS):
+          obj = _VARS['map'][column][row]
+          if obj:
+            obj.update_state()
+    iterations += 1
+    # print('iteration ', iterations, _VARS['exited'], ex)
+    
 
 
 def main():
@@ -81,6 +98,9 @@ def main():
   truck1.set_data(GRID_ORIGIN)
   _VARS['map'][10][8] = truck1
 
+
+  _VARS['simulationThread'] = th.Thread(target=run_simulation, name='simulationThread', args=(_VARS,))
+  _VARS['simulationThread'].start()
   while True:
     checkEvents()
     _VARS['surf'].fill(const.GREY)
@@ -88,7 +108,7 @@ def main():
     fillCells()
     pygame.display.update()
     # updateState()
-    pygame.time.delay(1000)
+    # pygame.time.delay(1000)
 
 
 # NEW METHOD FOR ADDING CELLS :
@@ -102,7 +122,7 @@ def fillCells():
             continue
 
           obj.draw(_VARS['surf'])
-          obj.update_state()
+          # obj.update_state()
 
           # X = GRID_ORIGIN[0] + (CELL_SIZE * row) + CELL_MARGIN + LINE_WIDTH / 2
           # Y = GRID_ORIGIN[1] + (CELL_SIZE * column) + CELL_MARGIN + LINE_WIDTH / 2
@@ -177,13 +197,18 @@ def checkEvents():
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
       sys.exit()
-      timer.cancel()
-      quited = True
+      _VARS['simulationThread'].stop()
+      _VARS['exited'] = True
+      exited = True
     elif event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE):
       pygame.quit()
       sys.exit()
-      timer.cancel()
-      quited = True
+      _VARS['simulationThread'].stop()
+      _VARS['exited'] = True
+      exited = True
+  print(_VARS['exited'])
+
+
 
 
 
