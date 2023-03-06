@@ -18,6 +18,7 @@ class DumpTruck:
         self.Y = Y
         self.img = img
         self.look = LEFT
+        self.activeState = None
         print('init look ', self.look)
 
     def set_data(self, gridOrigin):
@@ -34,13 +35,16 @@ class DumpTruck:
         Y = GRID_ORIGIN[1] + (CELL_SIZE * self.Y)
         surf.blit(self.img, (X, Y))
 
-    def update_state(self):
-        side = random.randint(0, 4)
-        self.turnTo(side)
+    def update(self):
+        if self.activeState:
+            self.activeState()
+
+        # side = random.randint(0, 4)
+        # self.turnTo(side)
         # if self.look != side:
             # self.turnTo(side)
             # return
-        self.moveForward()
+        # self.moveForward()
 
     def moveRight(self):
         # self.turnTo(RIGHT)

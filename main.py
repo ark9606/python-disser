@@ -8,40 +8,37 @@ import constants as const
 import dump_truck
 import time
 
-
-# SCREENSIZE = WIDTH, HEIGHT = 1024, 768
 BLACK = const.BLACK
 GREY = const.GREY
-# GREY = (230, 230, 230)
-# GREEN = (0, 255, 0)
-# RED = (255, 0, 0)
 CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-# WINDOW_MARGIN = LINE_WIDTH
 
 truckImg = pygame.image.load('./static/truck2.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
-# cellMAP = np.random.randint(1, size=(16, 16))
 cellMAP = [
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
+  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
 ]
 GRID_CELLS = const.GRID_CELLS
 GRID_ORIGIN = const.GRID_ORIGIN
@@ -70,7 +67,7 @@ def updateState():
 def run_simulation(ex):
   iterations = 0
   while True:
-    time.sleep(0.250)
+    time.sleep(0.5)
     checkEvents()
     # if ex:
       # break
@@ -79,7 +76,7 @@ def run_simulation(ex):
       for column in range(GRID_CELLS):
           obj = _VARS['map'][column][row]
           if obj:
-            obj.update_state()
+            obj.update()
     iterations += 1
     # print('iteration ', iterations, _VARS['exited'], ex)
     
@@ -111,7 +108,6 @@ def main():
     # pygame.time.delay(1000)
 
 
-# NEW METHOD FOR ADDING CELLS :
 def fillCells():
   # GET CELL DIMENSIONS...
   for row in range(GRID_CELLS):
@@ -196,6 +192,7 @@ def drawSquareGrid(origin, gridWH, cells):
 def checkEvents():
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
+      pygame.quit()
       sys.exit()
       _VARS['simulationThread'].stop()
       _VARS['exited'] = True
@@ -207,10 +204,6 @@ def checkEvents():
       _VARS['exited'] = True
       exited = True
   print(_VARS['exited'])
-
-
-
-
 
 
 if __name__ == '__main__':
