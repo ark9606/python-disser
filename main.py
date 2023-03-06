@@ -17,60 +17,31 @@ LINE_COLOR = const.LINE_COLOR
 
 truckImg = pygame.image.load('./static/truck2.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
-
-cellMAP = [
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-  [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
-]
 GRID_CELLS = const.GRID_CELLS
 GRID_ORIGIN = const.GRID_ORIGIN
 # GRID_SIZE = GRID_CELLS * CELL_SIZE
 # GRID_ORIGIN = (WIDTH / 2 - GRID_SIZE / 2, WINDOW_MARGIN)
 CELL_MARGIN = const.CELL_MARGIN
 
-# CELL_SIZE = (GRID_SIZE / GRID_CELLS) - (CELL_MARGIN * 2)
+cellMAP = []
+for i in range(GRID_CELLS):
+  row = []
+  for k in range(GRID_CELLS):
+    row.append(None)
+  cellMAP.append(row)
 
 _VARS = {
   'surf': False,
   'simulationThread': False,
   'gridCells': GRID_CELLS,
   'map': cellMAP,
-  'exited': False
 }
-exited = False
-
-def updateState():
-  # _VARS['map'] = np.random.randint(3, size=(16, 16))
-  # _VARS['map'] = np.random.randint(1, size=(16, 16))
-  # _VARS['map'][0][0] = 
-  print('tick')
-  print(_VARS['map'])
 
 def run_simulation(ex):
   iterations = 0
   while True:
     time.sleep(0.5)
     checkEvents()
-    # if ex:
-      # break
 
     for row in range(GRID_CELLS):
       for column in range(GRID_CELLS):
@@ -78,7 +49,6 @@ def run_simulation(ex):
           if obj:
             obj.update()
     iterations += 1
-    # print('iteration ', iterations, _VARS['exited'], ex)
     
 
 
@@ -104,8 +74,6 @@ def main():
     drawSquareGrid(GRID_ORIGIN, const.GRID_SIZE, GRID_CELLS)
     fillCells()
     pygame.display.update()
-    # updateState()
-    # pygame.time.delay(1000)
 
 
 def fillCells():
@@ -195,15 +163,10 @@ def checkEvents():
       pygame.quit()
       sys.exit()
       _VARS['simulationThread'].stop()
-      _VARS['exited'] = True
-      exited = True
     elif event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE):
       pygame.quit()
       sys.exit()
       _VARS['simulationThread'].stop()
-      _VARS['exited'] = True
-      exited = True
-  print(_VARS['exited'])
 
 
 if __name__ == '__main__':
