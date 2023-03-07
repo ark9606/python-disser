@@ -6,6 +6,7 @@ import time
 import threading as th
 import constants as const
 import dump_truck
+import blocks
 import time
 
 BLACK = const.BLACK
@@ -15,13 +16,14 @@ CELL_SIZE = const.CELL_SIZE
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
 
-truckImg = pygame.image.load('./static/truck2.png')
-truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
+
 GRID_CELLS = const.GRID_CELLS
 GRID_ORIGIN = const.GRID_ORIGIN
 # GRID_SIZE = GRID_CELLS * CELL_SIZE
 # GRID_ORIGIN = (WIDTH / 2 - GRID_SIZE / 2, WINDOW_MARGIN)
 CELL_MARGIN = const.CELL_MARGIN
+
+simulation_running = True
 
 cellMAP = []
 for i in range(GRID_CELLS):
@@ -39,8 +41,8 @@ _VARS = {
 
 def run_simulation(ex):
   iterations = 0
-  while True:
-    time.sleep(0.5)
+  while simulation_running:
+    time.sleep(0.1)
     checkEvents()
 
     for row in range(GRID_CELLS):
@@ -57,23 +59,26 @@ def main():
   _VARS['surf'] = pygame.display.set_mode(const.SCREENSIZE)
   
   # sets all rows in column with truck
-  truck = dump_truck.DumpTruck(5, 7, truckImg)
+  truck = dump_truck.DumpTruck(5, 7)
   truck.set_data(GRID_ORIGIN)
   _VARS['map'][5][7] = truck
 
-  truck1 = dump_truck.DumpTruck(10, 8, truckImg)
+  truck1 = dump_truck.DumpTruck(10, 8)
   truck1.set_data(GRID_ORIGIN)
   _VARS['map'][10][8] = truck1
+  _VARS['map'][15][15] = blocks.Ore(15, 15)
+  _VARS['map'][3][3] = blocks.Rock(3, 3)
+
 
 
   _VARS['simulationThread'] = th.Thread(target=run_simulation, name='simulationThread', args=(_VARS,))
   _VARS['simulationThread'].start()
-  while True:
+  while simulation_running:
     checkEvents()
     _VARS['surf'].fill(const.GREY)
     drawSquareGrid(GRID_ORIGIN, const.GRID_SIZE, GRID_CELLS)
     fillCells()
-    pygame.display.update()
+    pygame.display.flip()
 
 
 def fillCells():
@@ -86,23 +91,6 @@ def fillCells():
             continue
 
           obj.draw(_VARS['surf'])
-          # obj.update_state()
-
-          # X = GRID_ORIGIN[0] + (CELL_SIZE * row) + CELL_MARGIN + LINE_WIDTH / 2
-          # Y = GRID_ORIGIN[1] + (CELL_SIZE * column) + CELL_MARGIN + LINE_WIDTH / 2
-          # fill = GREY
-          # if obj.get_code() == const.GRID_CODE_TRUCK:
-          #   fill = BLACK
-          #   X = GRID_ORIGIN[0] + (CELL_SIZE * row)
-          #   Y = GRID_ORIGIN[1] + (CELL_SIZE * column)
-          #   _VARS['surf'].blit(truckImg, (X, Y))
-
-
-          # elif obj.get_code() == 2:
-          #   fill = RED
-          
-
-          # drawSquareCell(X, Y, CELL_SIZE - CELL_MARGIN * 2, CELL_SIZE - CELL_MARGIN * 2, fill)
 
 
 # Draw filled rectangle at coordinates
@@ -160,10 +148,12 @@ def drawSquareGrid(origin, gridWH, cells):
 def checkEvents():
   for event in pygame.event.get():
     if event.type == pygame.QUIT:
+      simulation_running = False
       pygame.quit()
       sys.exit()
       _VARS['simulationThread'].stop()
     elif event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE):
+      simulation_running = False
       pygame.quit()
       sys.exit()
       _VARS['simulationThread'].stop()
