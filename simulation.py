@@ -1,7 +1,7 @@
 import sys
 import threading as th
 import pygame
-from pygame.locals import KEYDOWN, K_q, K_ESCAPE
+from pygame.locals import KEYDOWN, K_q, K_r, K_ESCAPE
 import constants as const
 from dump_truck import DumpTruck
 from blocks import Ore, Rock
@@ -22,9 +22,15 @@ class Simulation:
     self.display = pygame.display.set_mode(const.SCREENSIZE)
     pygame.display.set_caption('Simulation')
     self.clock = pygame.time.Clock()
+    self.reset()
+  
+  def reset(self):
+    print('reset')
     self.score = 0
     self.running = False
     self.map = self.get_map()
+    self.iteration = 0
+
 
   def get_map(self):
     cellMAP = []
@@ -129,5 +135,8 @@ class Simulation:
         self.running = False
         pygame.quit()
         sys.exit()
+      # elif event.type == KEYDOWN and event.key == K_r:
+        # self.reset()
+        # self.run()
 
         
