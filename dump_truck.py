@@ -1,6 +1,7 @@
 import constants as const
 import pygame
 import random
+from enum import IntEnum
 
 GRID_CELLS = const.GRID_CELLS
 GRID_ORIGIN = const.GRID_ORIGIN
@@ -12,15 +13,11 @@ truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
 TRUCK_DEFAULT_FUEL_CELLS = 999999
 
-UP = 0
-RIGHT = 1
-DOWN = 2
-LEFT = 3
-
-ANGLE_LEFT = 0
-ANGLE_UP = -90
-ANGLE_RIGHT = -180
-ANGLE_DOWN = 90
+class Angle(IntEnum):
+  LEFT = 0
+  UP = -90
+  RIGHT = -180
+  DOWN = 90
 
 # states
 STATE_IDLE = 1
@@ -49,9 +46,9 @@ class DumpTruck:
         self.Y = Y
         self.img = truckImg
         # self.look = LEFT
-        self.angle = 0
+        self.angle = Angle.LEFT
         self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
-        self.rotate_to(ANGLE_LEFT)
+        self.rotate_to(Angle.LEFT)
         self.activeState = None
         self.brain = FSM()
         self.brain.push_state(STATE_GOTO_LOAD)
@@ -85,20 +82,20 @@ class DumpTruck:
         # self.moveForward()
 
     def go_to_load(self):
-        # turning at borders of map
-        if self.angle == ANGLE_LEFT and self.X == 0:
-            self.rotate_to(ANGLE_UP)
+      # turning at borders of map
+      if self.angle == Angle.LEFT and self.X == 0:
+        self.rotate_to(Angle.UP)
 
-        elif self.angle == ANGLE_UP and self.Y == 0:
-            self.rotate_to(ANGLE_RIGHT)
+      elif self.angle == Angle.UP and self.Y == 0:
+        self.rotate_to(Angle.RIGHT)
 
-        elif self.angle == ANGLE_RIGHT and self.X == GRID_CELLS - 1:
-            self.rotate_to(ANGLE_DOWN)
+      elif self.angle == Angle.RIGHT and self.X == GRID_CELLS - 1:
+        self.rotate_to(Angle.DOWN)
 
-        elif self.angle == ANGLE_DOWN and self.Y == GRID_CELLS - 1:
-            self.rotate_to(ANGLE_LEFT)
+      elif self.angle == Angle.DOWN and self.Y == GRID_CELLS - 1:
+        self.rotate_to(Angle.LEFT)
 
-        self.moveForward()
+      self.moveForward()
 
     def moveRight(self):
         # self.turnTo(RIGHT)
@@ -121,32 +118,23 @@ class DumpTruck:
 
 
     def moveDown(self):
-        # self.turnTo(DOWN)
-        if self.Y < (GRID_CELLS - 1) and self.fuel_cells > 0:
-            self.Y += 1
-            self.fuel_cells -= 1
+      # self.turnTo(DOWN)
+      if self.Y < (GRID_CELLS - 1) and self.fuel_cells > 0:
+        self.Y += 1
+        self.fuel_cells -= 1
 
     
     def moveForward(self):
-        if self.angle == ANGLE_RIGHT:
-            self.moveRight()
-        elif self.angle == ANGLE_DOWN:
-            self.moveDown()
-        elif self.angle == ANGLE_LEFT:
-            self.moveLeft()
-        elif self.angle == ANGLE_UP:
-            self.moveUp()
-    
-    # def turnTo(self, to):
-    #     diff = self.look - to
-    #     if diff == 0:
-    #         return
-        
-    #     direction = 1 if diff > 0 else -1
-    #     self.img = pygame.transform.rotate(self.img, 90 * direction)
-    #     self.look += (direction * -1)
+      if self.angle == Angle.RIGHT:
+        self.moveRight()
+      elif self.angle == Angle.DOWN:
+        self.moveDown()
+      elif self.angle == Angle.LEFT:
+        self.moveLeft()
+      elif self.angle == Angle.UP:
+        self.moveUp()
     
     def rotate_to(self, new_angle):
-        rotate = (360 - self.angle + new_angle)
-        self.angle = new_angle
-        self.img = pygame.transform.rotate(self.img, rotate)
+      rotate = (360 - int(self.angle) + int(new_angle))
+      self.angle = new_angle
+      self.img = pygame.transform.rotate(self.img, rotate)
