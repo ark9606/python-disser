@@ -8,6 +8,7 @@ import constants as const
 import dump_truck
 import blocks
 import time
+from simulation import Simulation
 
 BLACK = const.BLACK
 GREY = const.GREY
@@ -56,9 +57,9 @@ def run_simulation(ex):
 
 def main():
   pygame.init()
+
   _VARS['surf'] = pygame.display.set_mode(const.SCREENSIZE)
   
-  # sets all rows in column with truck
   truck = dump_truck.DumpTruck(5, 7)
   truck.set_data(GRID_ORIGIN)
   _VARS['map'][5][7] = truck
@@ -127,9 +128,6 @@ def drawSquareGrid(origin, gridWH, cells):
       (CONTAINER_WIDTH_HEIGHT + cont_x,
        CONTAINER_WIDTH_HEIGHT + cont_y), LINE_WIDTH)
 
-    # DRAW Grid cells:
-    # Get cell size, just one since its a square grid.
-    # cellSize = CONTAINER_WIDTH_HEIGHT/cells
     cellSize = CELL_SIZE
 
     # VERTICAL DIVISIONS: (0,1,2) for grid(3) for example
