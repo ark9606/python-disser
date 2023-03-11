@@ -14,7 +14,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 5
+SPEED = 10
 
 
 class Simulation:
@@ -31,6 +31,20 @@ class Simulation:
     self.map = self.get_map()
     self.iteration = 0
 
+  def make_step(self):
+    self.check_input()
+
+    for row in range(GRID_CELLS):
+      for column in range(GRID_CELLS):
+          obj = self.map[column][row]
+          if obj:
+            obj.update()
+
+    self.update_ui()
+    self.clock.tick(SPEED)
+    finished = False
+    return finished, self.score
+    
 
   def get_map(self):
     cellMAP = []
@@ -59,7 +73,6 @@ class Simulation:
     while self.running:
       self.check_input()
       self.update_ui()
-      # self.score +=1
 
   def run_logic(self):
     iterations = 0
@@ -135,8 +148,7 @@ class Simulation:
         self.running = False
         pygame.quit()
         sys.exit()
-      # elif event.type == KEYDOWN and event.key == K_r:
-        # self.reset()
-        # self.run()
+      elif event.type == KEYDOWN and event.key == K_r:
+        self.reset()
 
         

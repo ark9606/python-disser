@@ -15,7 +15,12 @@ def main():
   pygame.init()
 
   simulation = Simulation()
-  simulation.run()
+  # simulation.run()
+  while True:
+    finished, score = simulation.make_step()
+      
+    if finished == True:
+        break
   
   pygame.quit()
 
