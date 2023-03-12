@@ -9,7 +9,7 @@ GRID_ORIGIN = const.GRID_ORIGIN
 CELL_SIZE = const.CELL_SIZE
 GRID_CODE = const.GRID_CODE_TRUCK
 
-truckImg = pygame.image.load('./static/truck2.png')
+truckImg = pygame.image.load('./static/truck3.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
 TRUCK_DEFAULT_FUEL_CELLS = 999999
@@ -28,10 +28,16 @@ class Rotation(IntEnum):
   RIGHT = 90
 
 class Degree(IntEnum):
-  TOP = 0
+  UP = 0
   RIGHT = 90
   DOWN = 180
   LEFT = 270
+
+class Direction(IntEnum):
+  UP = 0
+  RIGHT = 1
+  DOWN = 2
+  LEFT = 3
 
 # states
 STATE_IDLE = 1
@@ -65,10 +71,11 @@ class DumpTruck:
         self.Y = Y
         self.img = truckImg
         # self.look = LEFT
-        self.angle = Angle.LEFT
-        # self.angle = Degree.TOP
+        # self.angle = Angle.LEFT
+        self.degree = Degree.UP
+        self.direction = Direction.UP
         self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
-        self.turn_to(Angle.LEFT)
+        # self.turn_to(Angle.LEFT)
         self.activeState = None
         # self.brain = FSM()
         # self.brain.push_state(STATE_GOTO_LOAD)
@@ -100,10 +107,10 @@ class DumpTruck:
         self.moveForward()
       # todo: fix rotation
       elif np.array_equal(action, [0, 1, 0]):
-        self.turn_to(Angle.RIGHT)
+        self.rotate_to(1)
         self.moveForward()
       elif np.array_equal(action, [0, 0, 1]):
-        self.turn_to(Angle.LEFT)
+        self.rotate_to(-1)
         self.moveForward()
 
 
@@ -113,10 +120,15 @@ class DumpTruck:
       point_up = Point(self.X, self.Y - 1)
       point_down = Point(self.X, self.Y + 1)
 
-      dir_left = self.angle == Angle.LEFT
-      dir_right = self.angle == Angle.RIGHT
-      dir_up = self.angle == Angle.UP
-      dir_down = self.angle == Angle.DOWN
+      # dir_left = self.degree == Degree.LEFT
+      # dir_right = self.degree == Degree.RIGHT
+      # dir_up = self.degree == Degree.UP
+      # dir_down = self.degree == Degree.DOWN
+
+      dir_left = self.direction == Direction.LEFT
+      dir_right = self.direction == Direction.RIGHT
+      dir_up = self.direction == Direction.UP
+      dir_down = self.direction == Direction.DOWN
 
       # TODO change to array of ores
       ore = self.ores_location[0]
@@ -162,21 +174,21 @@ class DumpTruck:
         return True
 
       return False
-    def go_to_load(self):
-      # turning at borders of map
-      if self.angle == Angle.LEFT and self.X == 0:
-        self.turn_to(Angle.UP)
-
-      elif self.angle == Angle.UP and self.Y == 0:
-        self.turn_to(Angle.RIGHT)
-
-      elif self.angle == Angle.RIGHT and self.X == GRID_CELLS - 1:
-        self.turn_to(Angle.DOWN)
-
-      elif self.angle == Angle.DOWN and self.Y == GRID_CELLS - 1:
-        self.turn_to(Angle.LEFT)
-
-      self.moveForward()
+    # def go_to_load(self):
+    #   # turning at borders of map
+    #   if self.angle == Angle.LEFT and self.X == 0:
+    #     self.turn_to(Angle.UP)
+    #
+    #   elif self.angle == Angle.UP and self.Y == 0:
+    #     self.turn_to(Angle.RIGHT)
+    #
+    #   elif self.angle == Angle.RIGHT and self.X == GRID_CELLS - 1:
+    #     self.turn_to(Angle.DOWN)
+    #
+    #   elif self.angle == Angle.DOWN and self.Y == GRID_CELLS - 1:
+    #     self.turn_to(Angle.LEFT)
+    #
+    #   self.moveForward()
 
     def moveRight(self):
         # self.turnTo(RIGHT)
@@ -204,21 +216,31 @@ class DumpTruck:
 
     
     def moveForward(self):
-      if self.angle == Angle.RIGHT:
+      if self.direction == Direction.RIGHT:
         self.moveRight()
-      elif self.angle == Angle.DOWN:
+      elif self.direction == Direction.DOWN:
         self.moveDown()
-      elif self.angle == Angle.LEFT:
+      elif self.direction == Direction.LEFT:
         self.moveLeft()
-      elif self.angle == Angle.UP:
+      elif self.direction == Direction.UP:
         self.moveUp()
+      # if self.degree == Degree.RIGHT:
+      #   self.moveRight()
+      # elif self.degree == Degree.DOWN:
+      #   self.moveDown()
+      # elif self.degree == Degree.LEFT:
+      #   self.moveLeft()
+      # elif self.degree == Degree.UP:
+      #   self.moveUp()
     
     def turn_to(self, new_angle):
       rotate = (360 - int(self.angle) + int(new_angle))
       self.angle = new_angle
       self.img = pygame.transform.rotate(self.img, rotate)
 
-    def rotate_to(self, new_angle):
-      rotate = (360 + int(new_angle))
-      self.angle = new_angle
-      self.img = pygame.transform.rotate(self.img, rotate)
+    def rotate_to(self, new_direction):
+      # rotate = (360 - int(self.degree) + int(new_degree))
+      # rotate = new_degree
+      # self.degree = new_degree
+      self.direction = (self.direction + new_direction) % 4
+      self.img = pygame.transform.rotate(self.img, new_direction * -90)

@@ -4,6 +4,7 @@ from collections import deque
 from simulation import Simulation
 from model import LinearQNet, QTrainer
 from helper import plot
+import time
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -95,6 +96,7 @@ def train():
       mean_score = total_score / agent.simulations_number
       plot_mean_scores.append(mean_score)
       plot(plot_scores, plot_mean_scores)
+    # time.sleep(0.5)
 
 
 

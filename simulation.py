@@ -16,7 +16,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 10
+SPEED = 40
 
 
 class Simulation:
@@ -53,10 +53,10 @@ class Simulation:
     reward = 0
     finished = False
     # meet the borders, TODO make depends on how big score (how far simulation goes)
-    # if self.get_truck().is_collision() or self.frame_iteration > 100 * self.score:
-    if self.get_truck().is_collision():
+    if self.get_truck().is_collision(None) or self.frame_iteration > 200:
       finished = True
       reward = -10
+      print('Reason: ', 'iterations limit' if self.frame_iteration > 200 else 'hit border')
       return reward, finished, self.score
 
     # 4. place new ore
