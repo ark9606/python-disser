@@ -88,7 +88,7 @@ def train():
       agent.simulations_number += 1
       agent.train_long_memory()
 
-      if score > best_score:
+      if score >= best_score:
         best_score = score
         agent.model.save()
 
