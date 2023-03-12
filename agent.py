@@ -66,7 +66,7 @@ def train():
   agent = Agent()
   simulation = Simulation()
   started_at = time.time()
-  print('Started at ', datetime.datetime.now())
+  print('Started at', datetime.datetime.now())
   while True:
     # get old state
     state_old = agent.get_state(simulation)
@@ -92,8 +92,10 @@ def train():
         best_score = score
         agent.model.save()
 
+      seconds = (time.time() - started_at)
+      mins = '{:10.2f}'.format(seconds / 60)
       print('Simulation', agent.simulations_number, 'Score', score, 'Best score', best_score)
-      print('Total duration', (time.time() - started_at), 'sec')
+      print('Total duration', mins, 'm')
 
       plot_scores.append(score)
       total_score += score
