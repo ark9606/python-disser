@@ -5,6 +5,7 @@ from simulation import Simulation
 from model import LinearQNet, QTrainer
 from helper import plot
 import time
+import datetime
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -64,6 +65,8 @@ def train():
   best_score = 0
   agent = Agent()
   simulation = Simulation()
+  started_at = time.time()
+  print('Started at ', datetime.datetime.now())
   while True:
     # get old state
     state_old = agent.get_state(simulation)
@@ -90,6 +93,7 @@ def train():
         agent.model.save()
 
       print('Simulation', agent.simulations_number, 'Score', score, 'Best score', best_score)
+      print('Total duration', (time.time() - started_at), 'sec')
 
       plot_scores.append(score)
       total_score += score

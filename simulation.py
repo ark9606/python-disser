@@ -53,10 +53,10 @@ class Simulation:
     reward = 0
     finished = False
     # meet the borders, TODO make depends on how big score (how far simulation goes)
-    if self.get_truck().is_collision(None) or self.frame_iteration > 200:
+    if self.get_truck().is_collision(None) or self.frame_iteration > 100:
       finished = True
       reward = -10
-      print('Reason: ', 'iterations limit' if self.frame_iteration > 200 else 'hit border')
+      print('Reason: ', 'iterations limit' if self.frame_iteration > 100 else 'hit border')
       return reward, finished, self.score
 
     # 4. place new ore
@@ -65,6 +65,7 @@ class Simulation:
     if self.get_truck().X == self.get_ore().X and self.get_truck().Y == self.get_ore().Y:
       self.score += 1
       reward = 10
+      self.frame_iteration = 0
       self.place_ore()
 
     self.update_ui()
@@ -99,8 +100,12 @@ class Simulation:
       curr_pos = self.ores_location[0]
       self.map[curr_pos.x][curr_pos.y] = None
 
-    x = random.randint(0, GRID_CELLS - 1)
-    y = random.randint(0, GRID_CELLS - 1)
+    truck = self.get_truck()
+    x = truck.X
+    y = truck.Y
+    while x == truck.X and y == truck.Y:
+      x = random.randint(0, GRID_CELLS - 1)
+      y = random.randint(0, GRID_CELLS - 1)
 
     self.map[x][y] = Ore(x, y)
     self.ores_location = [Point(x, y)]

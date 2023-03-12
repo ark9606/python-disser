@@ -191,28 +191,24 @@ class DumpTruck:
     #   self.moveForward()
 
     def moveRight(self):
-        # self.turnTo(RIGHT)
-        if self.X < (GRID_CELLS - 1) and self.fuel_cells > 0:
-            self.X += 1
-            self.fuel_cells -= 1
+      # if self.X < (GRID_CELLS - 1) and self.fuel_cells > 0:
+      self.X += 1
+      self.fuel_cells -= 1
 
     def moveLeft(self):
-        # self.turnTo(LEFT)
-        if self.X > 0 and self.fuel_cells > 0:
-            self.X -= 1
-            self.fuel_cells -= 1
+      # if self.X > 0 and self.fuel_cells > 0:
+      self.X -= 1
+      self.fuel_cells -= 1
 
     def moveUp(self):
-        # self.turnTo(UP)
-        if self.Y > 0 and self.fuel_cells > 0:
-            self.Y -= 1
-            self.fuel_cells -= 1
+      # if self.Y > 0 and self.fuel_cells > 0:
+      self.Y -= 1
+      self.fuel_cells -= 1
 
     def moveDown(self):
-      # self.turnTo(DOWN)
-      if self.Y < (GRID_CELLS - 1) and self.fuel_cells > 0:
-        self.Y += 1
-        self.fuel_cells -= 1
+      # if self.Y < (GRID_CELLS - 1) and self.fuel_cells > 0:
+      self.Y += 1
+      self.fuel_cells -= 1
 
     
     def moveForward(self):
