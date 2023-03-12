@@ -7,6 +7,7 @@ from dump_truck import DumpTruck
 from blocks import Ore, Rock
 import time
 from utils import Point
+import random
 
 pygame.init()
 GRID_CELLS = const.GRID_CELLS
@@ -26,27 +27,48 @@ class Simulation:
     self.reset()
   
   def reset(self):
+    # TODO: move to truck after train check
     self.score = 0
     self.running = False
+    self.ores_location = []
     self.map = self.get_map()
+    self.place_ore()
     self.frame_iteration = 0
 
   def make_step(self, action):
+    self.frame_iteration += 1
+    # 1. check user input
     self.check_input()
 
+    # 2. move (update state of objects)
     for row in range(len(self.map)):
       for column in range(len(self.map[row])):
           obj = self.map[column][row]
           if obj:
             obj.update(action)
 
+    # 3. check if simulation is finished
+    # temp check of finished for check training, todo: change this after train check
+    # temp calc of reward for check training, todo: change this after train check
     reward = 0
-    # TODO calc reward
-    # TODO check if simulation is over
+    finished = False
+    # meet the borders, TODO make depends on how big score (how far simulation goes)
+    # if self.get_truck().is_collision() or self.frame_iteration > 100 * self.score:
+    if self.get_truck().is_collision():
+      finished = True
+      reward = -10
+      return reward, finished, self.score
+
+    # 4. place new ore
+    # todo make communication between trucks, and choose closer ore (on path)
+    # todo: now truck is ON ore, change to being near the ore
+    if self.get_truck().X == self.get_ore().X and self.get_truck().Y == self.get_ore().Y:
+      self.score += 1
+      reward = 10
+      self.place_ore()
 
     self.update_ui()
     self.clock.tick(SPEED)
-    finished = False
     return reward, finished, self.score
     
 
@@ -65,12 +87,38 @@ class Simulation:
     # truck1.set_data(GRID_ORIGIN)
     # cellMAP[10][8] = truck1
 
-    cellMAP[15][15] = Ore(15, 15)
-    cellMAP[3][3] = Rock(3, 3)
+    # cellMAP[15][15] = Ore(15, 15)
+    # self.place_ore(cellMAP, 15, 15)
+    # cellMAP[3][3] = Rock(3, 3)
 
     # truck.set_map(cellMAP)
-    truck.set_ores_location([Point(15, 15)])
     return cellMAP
+
+  def place_ore(self):
+    if len(self.ores_location) > 0:
+      curr_pos = self.ores_location[0]
+      self.map[curr_pos.x][curr_pos.y] = None
+
+    x = random.randint(0, GRID_CELLS - 1)
+    y = random.randint(0, GRID_CELLS - 1)
+
+    self.map[x][y] = Ore(x, y)
+    self.ores_location = [Point(x, y)]
+    self.get_truck().set_ores_location(self.ores_location)
+
+
+  # temp method for check training, todo: remove this after train check
+  def get_truck(self):
+    truck = self.map[5][7]
+    return truck
+
+  # temp method for check training, todo: remove this after train check
+  def get_ore(self):
+    curr_pos = self.ores_location[0]
+    ore = self.map[curr_pos.x][curr_pos.y]
+    return ore
+    # return self.map[15][15]
+
 
   def update_ui(self):
     self.display.fill(const.GREY)

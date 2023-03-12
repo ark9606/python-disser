@@ -1,8 +1,9 @@
 import torch
 import random
-import numpy as np
 from collections import deque
 from simulation import Simulation
+from model import LinearQNet, QTrainer
+from helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -12,13 +13,14 @@ class Agent:
   def __init__(self):
     self.simulations_number = 0
     self.epsilon = 0 # randomness
-    self.gamma = 0 # discount rate
+    self.gamma = 0.9 # discount rate
     self.memory = deque(maxlen=MAX_MEMORY)
-    self.model = None # TODO
-    self.trainer = None # TODO
+    self.model = LinearQNet(11, 256, 3) # 11 states, 3 actions
+    self.trainer = QTrainer(self.model, learning_rate = LR, gamma = self.gamma)
 
   def get_state(self, simulation):
-    pass
+    # TODO get state inside truck
+    return simulation.get_truck().get_state()
 
   def remember(self, state, action, reward, next_state, done):
     # remove from left, if maxlen exceeded
@@ -46,7 +48,7 @@ class Agent:
       final_move[ind] = 1
     else:
       state0 = torch.tensor(state, dtype = torch.float)
-      prediction = self.model.predict(state0)
+      prediction = self.model(state0) # predict
       ind = torch.argmax(prediction).item()
       final_move[ind] = 1
     return final_move
@@ -84,11 +86,15 @@ def train():
 
       if score > best_score:
         best_score = score
-        # TODO agent.model.save()
+        agent.model.save()
 
       print('Simulation', agent.simulations_number, 'Score', score, 'Best score', best_score)
 
-      # TODO: make a plot
+      plot_scores.append(score)
+      total_score += score
+      mean_score = total_score / agent.simulations_number
+      plot_mean_scores.append(mean_score)
+      plot(plot_scores, plot_mean_scores)
 
 
 

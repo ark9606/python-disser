@@ -23,6 +23,16 @@ class Angle(IntEnum):
   RIGHT = -180
   DOWN = 90
 
+class Rotation(IntEnum):
+  LEFT = -90
+  RIGHT = 90
+
+class Degree(IntEnum):
+  TOP = 0
+  RIGHT = 90
+  DOWN = 180
+  LEFT = 270
+
 # states
 STATE_IDLE = 1
 STATE_GOTO_LOAD = 2
@@ -56,11 +66,12 @@ class DumpTruck:
         self.img = truckImg
         # self.look = LEFT
         self.angle = Angle.LEFT
+        # self.angle = Degree.TOP
         self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
-        self.rotate_to(Angle.LEFT)
+        self.turn_to(Angle.LEFT)
         self.activeState = None
-        self.brain = FSM()
-        self.brain.push_state(STATE_GOTO_LOAD)
+        # self.brain = FSM()
+        # self.brain.push_state(STATE_GOTO_LOAD)
         # self.map = []
         self.ores_location = []
 
@@ -87,27 +98,14 @@ class DumpTruck:
     def update(self, action):
       if np.array_equal(action, [1, 0, 0]):
         self.moveForward()
+      # todo: fix rotation
       elif np.array_equal(action, [0, 1, 0]):
-        self.rotate_to(Angle.RIGHT)
+        self.turn_to(Angle.RIGHT)
         self.moveForward()
       elif np.array_equal(action, [0, 0, 1]):
-        self.rotate_to(Angle.LEFT)
+        self.turn_to(Angle.LEFT)
         self.moveForward()
 
-
-
-      # current_state = self.brain.get_current_state()
-      # if current_state == STATE_IDLE:
-      #     pass
-      # elif current_state == STATE_GOTO_LOAD:
-      #     self.go_to_load()
-
-        # side = random.randint(0, 4)
-        # self.turnTo(side)
-        # if self.look != side:
-            # self.turnTo(side)
-            # return
-        # self.moveForward()
 
     def get_state(self):
       point_left = Point(self.X - 1, self.Y)
@@ -123,24 +121,23 @@ class DumpTruck:
       # TODO change to array of ores
       ore = self.ores_location[0]
 
+      border_straight = (dir_right and self.is_collision(point_right)) or (dir_left and self.is_collision(point_left)) or (dir_up and self.is_collision(point_up)) or (dir_down and self.is_collision(point_down))
+      border_right = (dir_right and self.is_collision(point_down)) or (dir_left and self.is_collision(point_up)) or (dir_up and self.is_collision(point_right)) or (dir_down and self.is_collision(point_left))
+      border_left = (dir_right and self.is_collision(point_up)) or (dir_left and self.is_collision(point_down)) or (dir_up and self.is_collision(point_left)) or (dir_down and self.is_collision(point_right))
+
+      ore_left = ore.x < self.X
+      ore_right = ore.x > self.X
+      ore_up = ore.y < self.Y
+      ore_down = ore.y > self.Y
       state = [
         # danger (border) straight
-        (dir_right and self.is_collision(point_right)) or
-        (dir_left and self.is_collision(point_left)) or
-        (dir_up and self.is_collision(point_up)) or
-        (dir_down and self.is_collision(point_down)),
+        border_straight,
 
         # danger (border) right
-        (dir_right and self.is_collision(point_down)) or
-        (dir_left and self.is_collision(point_up)) or
-        (dir_up and self.is_collision(point_right)) or
-        (dir_down and self.is_collision(point_left)),
+        border_right,
 
         # danger (border) left
-        (dir_right and self.is_collision(point_up)) or
-        (dir_left and self.is_collision(point_down)) or
-        (dir_up and self.is_collision(point_left)) or
-        (dir_down and self.is_collision(point_right)),
+        border_left,
 
         # Move direction
         dir_left,
@@ -149,10 +146,10 @@ class DumpTruck:
         dir_down,
 
         # Ore location
-        ore.x < self.X,   # ore left
-        ore.x > self.X,   # ore right
-        ore.y < self.Y,   # ore up
-        ore.y > self.Y    # ore down
+        ore_left,   # ore left
+        ore_right,   # ore right
+        ore_up,   # ore up
+        ore_down    # ore down
       ]
       return np.array(state, dtype = int)
 
@@ -168,16 +165,16 @@ class DumpTruck:
     def go_to_load(self):
       # turning at borders of map
       if self.angle == Angle.LEFT and self.X == 0:
-        self.rotate_to(Angle.UP)
+        self.turn_to(Angle.UP)
 
       elif self.angle == Angle.UP and self.Y == 0:
-        self.rotate_to(Angle.RIGHT)
+        self.turn_to(Angle.RIGHT)
 
       elif self.angle == Angle.RIGHT and self.X == GRID_CELLS - 1:
-        self.rotate_to(Angle.DOWN)
+        self.turn_to(Angle.DOWN)
 
       elif self.angle == Angle.DOWN and self.Y == GRID_CELLS - 1:
-        self.rotate_to(Angle.LEFT)
+        self.turn_to(Angle.LEFT)
 
       self.moveForward()
 
@@ -216,7 +213,12 @@ class DumpTruck:
       elif self.angle == Angle.UP:
         self.moveUp()
     
-    def rotate_to(self, new_angle):
+    def turn_to(self, new_angle):
       rotate = (360 - int(self.angle) + int(new_angle))
+      self.angle = new_angle
+      self.img = pygame.transform.rotate(self.img, rotate)
+
+    def rotate_to(self, new_angle):
+      rotate = (360 + int(new_angle))
       self.angle = new_angle
       self.img = pygame.transform.rotate(self.img, rotate)
