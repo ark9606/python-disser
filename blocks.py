@@ -30,7 +30,7 @@ class Block:
         Y = GRID_ORIGIN[1] + (CELL_SIZE * self.Y)
         surf.blit(self.img, (X, Y))
 
-    def update(self):
+    def update(self, action = None):
         pass
 
 class Ore(Block):

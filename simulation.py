@@ -6,6 +6,7 @@ import constants as const
 from dump_truck import DumpTruck
 from blocks import Ore, Rock
 import time
+from utils import Point
 
 pygame.init()
 GRID_CELLS = const.GRID_CELLS
@@ -25,25 +26,28 @@ class Simulation:
     self.reset()
   
   def reset(self):
-    print('reset')
     self.score = 0
     self.running = False
     self.map = self.get_map()
-    self.iteration = 0
+    self.frame_iteration = 0
 
-  def make_step(self):
+  def make_step(self, action):
     self.check_input()
 
-    for row in range(GRID_CELLS):
-      for column in range(GRID_CELLS):
+    for row in range(len(self.map)):
+      for column in range(len(self.map[row])):
           obj = self.map[column][row]
           if obj:
-            obj.update()
+            obj.update(action)
+
+    reward = 0
+    # TODO calc reward
+    # TODO check if simulation is over
 
     self.update_ui()
     self.clock.tick(SPEED)
     finished = False
-    return finished, self.score
+    return reward, finished, self.score
     
 
   def get_map(self):
@@ -57,34 +61,16 @@ class Simulation:
     truck.set_data(GRID_ORIGIN)
     cellMAP[5][7] = truck
 
-    truck1 = DumpTruck(10, 8)
-    truck1.set_data(GRID_ORIGIN)
-    cellMAP[10][8] = truck1
+    # truck1 = DumpTruck(10, 8)
+    # truck1.set_data(GRID_ORIGIN)
+    # cellMAP[10][8] = truck1
 
     cellMAP[15][15] = Ore(15, 15)
     cellMAP[3][3] = Rock(3, 3)
+
+    # truck.set_map(cellMAP)
+    truck.set_ores_location([Point(15, 15)])
     return cellMAP
-
-  def run(self):
-    self.running = True
-    self.logic_thread = th.Thread(target=self.run_logic, name='logic_thread')
-    self.logic_thread.start()
-
-    while self.running:
-      self.check_input()
-      self.update_ui()
-
-  def run_logic(self):
-    iterations = 0
-    while self.running:
-      time.sleep(0.2)
-
-      for row in range(GRID_CELLS):
-        for column in range(GRID_CELLS):
-            obj = self.map[column][row]
-            if obj:
-              obj.update()
-      iterations += 1
 
   def update_ui(self):
     self.display.fill(const.GREY)
@@ -150,5 +136,26 @@ class Simulation:
         sys.exit()
       elif event.type == KEYDOWN and event.key == K_r:
         self.reset()
+
+  # def run(self):
+  #   self.running = True
+  #   self.logic_thread = th.Thread(target=self.run_logic, name='logic_thread')
+  #   self.logic_thread.start()
+  #
+  #   while self.running:
+  #     self.check_input()
+  #     self.update_ui()
+  #
+  # def run_logic(self):
+  #   iterations = 0
+  #   while self.running:
+  #     time.sleep(0.2)
+  #
+  #     for row in range(GRID_CELLS):
+  #       for column in range(GRID_CELLS):
+  #           obj = self.map[column][row]
+  #           if obj:
+  #             obj.update()
+  #     iterations += 1
 
         

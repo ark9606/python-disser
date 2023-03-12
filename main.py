@@ -17,7 +17,7 @@ def main():
   simulation = Simulation()
   # simulation.run()
   while True:
-    finished, score = simulation.make_step()
+    reward, finished, score = simulation.make_step(1)
       
     if finished == True:
         break
