@@ -25,10 +25,12 @@ class Simulation:
     pygame.display.set_caption('Simulation')
     self.clock = pygame.time.Clock()
     self.reset()
-    self.truck = None
+
   
   def reset(self):
     # TODO: move to truck after train check
+    self.truck = DumpTruck(5, 7)
+    self.truck.set_data(GRID_ORIGIN)
     self.score = 0
     self.running = False
     self.ores_location = []
@@ -84,9 +86,7 @@ class Simulation:
       for k in range(GRID_CELLS):
         row.append(None)
       cellMAP.append(row)
-    truck = DumpTruck(5, 7)
-    truck.set_data(GRID_ORIGIN)
-    cellMAP[5][7] = truck
+    cellMAP[5][7] = self.truck
 
     # truck1 = DumpTruck(10, 8)
     # truck1.set_data(GRID_ORIGIN)
@@ -97,7 +97,6 @@ class Simulation:
     # cellMAP[3][3] = Rock(3, 3)
 
     # truck.set_map(cellMAP)
-    self.truck = truck
     return cellMAP
 
   def place_ore(self):
