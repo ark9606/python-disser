@@ -25,6 +25,7 @@ class Simulation:
     pygame.display.set_caption('Simulation')
     self.clock = pygame.time.Clock()
     self.reset()
+    self.truck = None
   
   def reset(self):
     # TODO: move to truck after train check
@@ -53,10 +54,12 @@ class Simulation:
     reward = 0
     finished = False
     # meet the borders, TODO make depends on how big score (how far simulation goes)
-    if self.get_truck().is_collision(None) or self.frame_iteration > 200:
+    if self.get_truck().is_collision(None) or self.frame_iteration > 200 or self.score > 100:
       finished = True
       reward = -10
-      reason = 'iterations limit' if self.frame_iteration > 200 else 'hit border'
+      reason = 'iter max' if self.frame_iteration > 200 else 'hit border'
+      if self.score > 100:
+        reason = 'score max'
       print('Reason', reason, 'iterations', self.frame_iteration)
       return reward, finished, self.score
 
@@ -94,6 +97,7 @@ class Simulation:
     # cellMAP[3][3] = Rock(3, 3)
 
     # truck.set_map(cellMAP)
+    self.truck = truck
     return cellMAP
 
   def place_ore(self):
@@ -115,8 +119,7 @@ class Simulation:
 
   # temp method for check training, todo: remove this after train check
   def get_truck(self):
-    truck = self.map[5][7]
-    return truck
+    return self.truck
 
   # temp method for check training, todo: remove this after train check
   def get_ore(self):
