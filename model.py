@@ -10,6 +10,11 @@ class LinearQNet(nn.Module):
     super().__init__()
     self.linear1 = nn.Linear(input_size, hidden_size)
     self.linear2 = nn.Linear(hidden_size, output_size)
+    model_folder_path = './model'
+    file_name = os.path.join(model_folder_path, 'model_best100.pth')
+    self.load_state_dict(torch.load(file_name))
+    self.eval()
+
 
   def forward(self, x):
     x = F.relu(self.linear1(x))

@@ -16,7 +16,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 40
+SPEED = 5
 
 
 class Simulation:
@@ -56,7 +56,7 @@ class Simulation:
     reward = 0
     finished = False
     # meet the borders, TODO make depends on how big score (how far simulation goes)
-    if self.get_truck().is_collision(None) or self.frame_iteration > 200 or self.score > 100:
+    if self.get_truck().is_collision(None) or self.frame_iteration > 200: #or self.score > 100:
       finished = True
       reward = -10
       reason = 'iter max' if self.frame_iteration > 200 else 'hit border'

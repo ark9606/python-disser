@@ -45,14 +45,18 @@ class Agent:
     # random moves: tradeoff exploration / exploitation
     self.epsilon = 80 - self.simulations_number # as more simulations -> less epsilon -> less random moves
     final_move = [0, 0, 0]
-    if random.randint(0, 200) < self.epsilon:
-      ind = random.randint(0, 2)
-      final_move[ind] = 1
-    else:
-      state0 = torch.tensor(state, dtype = torch.float)
-      prediction = self.model(state0) # predict
-      ind = torch.argmax(prediction).item()
-      final_move[ind] = 1
+    # if random.randint(0, 200) < self.epsilon:
+    #   ind = random.randint(0, 2)
+    #   final_move[ind] = 1
+    # else:
+    #   state0 = torch.tensor(state, dtype = torch.float)
+    #   prediction = self.model(state0) # predict
+    #   ind = torch.argmax(prediction).item()
+    #   final_move[ind] = 1
+    state0 = torch.tensor(state, dtype=torch.float)
+    prediction = self.model(state0)  # predict
+    ind = torch.argmax(prediction).item()
+    final_move[ind] = 1
     return final_move
 
 
@@ -67,6 +71,7 @@ def train():
   simulation = Simulation()
   started_at = time.time()
   print('Started at', datetime.datetime.now())
+  iter = 0
   while True:
     # get old state
     state_old = agent.get_state(simulation)
@@ -76,33 +81,34 @@ def train():
 
     # perform move and get new state
     reward, done, score = simulation.make_step(final_move)
-    state_new = agent.get_state(simulation)
+    iter += 1
+    print('score', score)
+    # state_new = agent.get_state(simulation)
 
-    agent.train_short_memory(state_old, final_move, reward, state_new, done)
+    # agent.train_short_memory(state_old, final_move, reward, state_new, done)
 
-    agent.remember(state_old, final_move, reward, state_new, done)
+    # agent.remember(state_old, final_move, reward, state_new, done)
 
-    if done:
-      # train long memory (experience), plot result
-      simulation.reset()
-      agent.simulations_number += 1
-      agent.train_long_memory()
-
-      if score >= best_score:
-        best_score = score
-        agent.model.save()
-
-      seconds = (time.time() - started_at)
-      mins = '{:10.2f}'.format(seconds / 60)
-      print('Simulation', agent.simulations_number, 'Score', score, 'Best score', best_score)
-      print('Total duration', mins, 'm')
-
-      plot_scores.append(score)
-      total_score += score
-      mean_score = total_score / agent.simulations_number
-      plot_mean_scores.append(mean_score)
-      plot(plot_scores, plot_mean_scores)
-    # time.sleep(0.5)
+    # if done:
+    #   # train long memory (experience), plot result
+    #   simulation.reset()
+    #   agent.simulations_number += 1
+    #   agent.train_long_memory()
+    #
+    #   if score >= best_score:
+    #     best_score = score
+    #     agent.model.save()
+    #
+    #   seconds = (time.time() - started_at)
+    #   mins = '{:10.2f}'.format(seconds / 60)
+    #   print('Simulation', agent.simulations_number, 'Score', score, 'Best score', best_score)
+    #   print('Total duration', mins, 'm')
+    #
+    #   plot_scores.append(score)
+    #   total_score += score
+    #   mean_score = total_score / agent.simulations_number
+    #   plot_mean_scores.append(mean_score)
+    #   plot(plot_scores, plot_mean_scores)
 
 
 
