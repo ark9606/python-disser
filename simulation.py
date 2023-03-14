@@ -56,12 +56,16 @@ class Simulation:
     reward = 0
     finished = False
     # meet the borders, TODO make depends on how big score (how far simulation goes)
-    if self.get_truck().is_collision(None) or self.frame_iteration > 200 or self.score > 100:
+    if self.get_truck().is_collision(None) or self.frame_iteration > 100:
       finished = True
       reward = -10
       reason = 'iter max' if self.frame_iteration > 200 else 'hit border'
-      if self.score > 100:
-        reason = 'score max'
+      print('Reason', reason, 'iterations', self.frame_iteration)
+      return reward, finished, self.score
+    if self.score > 100:
+      finished = True
+      reward = 10
+      reason = 'score max'
       print('Reason', reason, 'iterations', self.frame_iteration)
       return reward, finished, self.score
 
