@@ -63,12 +63,12 @@ class Agent:
 
 
 
-def train():
+def train(existing_model_file):
   plot_scores = []
   plot_mean_scores = []
   total_score = 0
   best_score = 0
-  agent = Agent(existing_model_file=None)
+  agent = Agent(existing_model_file)
   simulation = Simulation()
   started_at = time.time()
   print('Started at', datetime.datetime.now())
@@ -129,5 +129,5 @@ def work(existing_model_file):
 
 
 if __name__ == '__main__':
-  # train()
-  work(existing_model_file='model_300_iter.pth')
+  train(existing_model_file='model_300_iter.pth')
+  # work(existing_model_file='model_300_iter.pth')
