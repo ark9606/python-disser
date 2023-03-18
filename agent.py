@@ -77,7 +77,8 @@ def train(existing_model_file):
     state_old = agent.get_state(simulation)
 
     # get move
-    final_move = agent.get_action_for_training(state_old)
+    # final_move = agent.get_action_for_training(state_old)
+    final_move = agent.get_predicted_action(state_old)
 
     # perform move and get new state
     reward, done, score = simulation.make_step(final_move)
@@ -129,5 +130,5 @@ def work(existing_model_file):
 
 
 if __name__ == '__main__':
-  train(existing_model_file='model_300_iter.pth')
-  # work(existing_model_file='model_300_iter.pth')
+  # train(existing_model_file='model_300_iter.pth')
+  work(existing_model_file='model_450_iter.pth')
