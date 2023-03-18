@@ -12,12 +12,12 @@ BATCH_SIZE = 1000
 LR = 0.001 # learning rate
 
 class Agent:
-  def __init__(self):
+  def __init__(self, existing_model_file):
     self.simulations_number = 0
     self.epsilon = 0 # randomness
     self.gamma = 0.9 # discount rate
     self.memory = deque(maxlen=MAX_MEMORY)
-    self.model = LinearQNet(11, 256, 3) # 11 states, 3 actions
+    self.model = LinearQNet(11, 256, 3, existing_model_file) # 11 states, 3 actions
     self.trainer = QTrainer(self.model, learning_rate = LR, gamma = self.gamma)
 
   def get_state(self, simulation):
@@ -41,7 +41,7 @@ class Agent:
   def train_short_memory(self, state, action, reward, next_state, done):
     self.trainer.train_step(state, action, reward, next_state, done)
 
-  def get_action(self, state):
+  def get_action_for_training(self, state):
     # random moves: tradeoff exploration / exploitation
     self.epsilon = 80 - self.simulations_number # as more simulations -> less epsilon -> less random moves
     final_move = [0, 0, 0]
@@ -49,10 +49,15 @@ class Agent:
       ind = random.randint(0, 2)
       final_move[ind] = 1
     else:
-      state0 = torch.tensor(state, dtype = torch.float)
-      prediction = self.model(state0) # predict
-      ind = torch.argmax(prediction).item()
-      final_move[ind] = 1
+      final_move = self.get_predicted_action(state)
+    return final_move
+
+  def get_predicted_action(self, state):
+    final_move = [0, 0, 0]
+    state0 = torch.tensor(state, dtype=torch.float)
+    prediction = self.model(state0)  # predict
+    ind = torch.argmax(prediction).item()
+    final_move[ind] = 1
     return final_move
 
 
@@ -63,7 +68,7 @@ def train():
   plot_mean_scores = []
   total_score = 0
   best_score = 0
-  agent = Agent()
+  agent = Agent(existing_model_file=None)
   simulation = Simulation()
   started_at = time.time()
   print('Started at', datetime.datetime.now())
@@ -72,7 +77,7 @@ def train():
     state_old = agent.get_state(simulation)
 
     # get move
-    final_move = agent.get_action(state_old)
+    final_move = agent.get_action_for_training(state_old)
 
     # perform move and get new state
     reward, done, score = simulation.make_step(final_move)
@@ -104,7 +109,25 @@ def train():
       plot(plot_scores, plot_mean_scores)
     # time.sleep(0.5)
 
+def work(existing_model_file):
+  agent = Agent(existing_model_file)
+  simulation = Simulation()
+  print('Started at', datetime.datetime.now())
+  iter = 0
+  while True:
+    # get old state
+    state_old = agent.get_state(simulation)
+
+    # get move
+    final_move = agent.get_predicted_action(state_old)
+
+    # perform move and get new state
+    reward, done, score = simulation.make_step(final_move)
+    iter += 1
+    print('score', score)
+
 
 
 if __name__ == '__main__':
-  train()
+  # train()
+  work(existing_model_file='model_300_iter.pth')
