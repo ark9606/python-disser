@@ -141,6 +141,12 @@ class DumpTruck:
       ore_right = ore.x > self.X
       ore_up = ore.y < self.Y
       ore_down = ore.y > self.Y
+
+      ore_dia_up_right = ore_up and ore_right
+      ore_dia_right_down = ore_right and ore_down
+      ore_dia_down_left = ore_down and ore_left
+      ore_dia_left_up = ore_left and ore_up
+
       state = [
         # danger (border) straight
         border_straight,
@@ -161,7 +167,11 @@ class DumpTruck:
         ore_left,   # ore left
         ore_right,   # ore right
         ore_up,   # ore up
-        ore_down    # ore down
+        ore_down,    # ore down
+        # ore_dia_up_right,
+        # ore_dia_right_down,
+        # ore_dia_down_left,
+        # ore_dia_left_up
       ]
       return np.array(state, dtype = int)
 

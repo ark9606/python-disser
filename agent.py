@@ -17,7 +17,7 @@ class Agent:
     self.epsilon = 0 # randomness
     self.gamma = 0.9 # discount rate
     self.memory = deque(maxlen=MAX_MEMORY)
-    self.model = LinearQNet(11, 256, 3, existing_model_file) # 11 states, 3 actions
+    self.model = LinearQNet(11, 256, 3, existing_model_file) # 15 states, 3 actions
     self.trainer = QTrainer(self.model, learning_rate = LR, gamma = self.gamma)
 
   def get_state(self, simulation):
@@ -77,8 +77,8 @@ def train(existing_model_file):
     state_old = agent.get_state(simulation)
 
     # get move
-    # final_move = agent.get_action_for_training(state_old)
-    final_move = agent.get_predicted_action(state_old)
+    final_move = agent.get_action_for_training(state_old)
+    # final_move = agent.get_predicted_action(state_old)
 
     # perform move and get new state
     reward, done, score = simulation.make_step(final_move)
@@ -130,5 +130,6 @@ def work(existing_model_file):
 
 
 if __name__ == '__main__':
-  # train(existing_model_file='model_300_iter.pth')
+  # train(None)
   work(existing_model_file='model_450_iter.pth')
+  # work(existing_model_file='model_15_inputs_251_iter.pth')
