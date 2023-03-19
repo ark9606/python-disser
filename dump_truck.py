@@ -39,6 +39,10 @@ class Direction(IntEnum):
   DOWN = 2
   LEFT = 3
 
+class Turn(IntEnum):
+  RIGHT = 1
+  LEFT = -1
+
 # states
 STATE_IDLE = 1
 STATE_GOTO_LOAD = 2
@@ -67,15 +71,13 @@ class FSM:
 
 class DumpTruck:
     def __init__(self, X, Y):
+        # todo: change to pos: Point
         self.X = X
         self.Y = Y
         self.img = truckImg
-        # self.look = LEFT
-        # self.angle = Angle.LEFT
         self.degree = Degree.UP
         self.direction = Direction.UP
         self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
-        # self.turn_to(Angle.LEFT)
         self.activeState = None
         # self.brain = FSM()
         # self.brain.push_state(STATE_GOTO_LOAD)
@@ -84,9 +86,6 @@ class DumpTruck:
 
     def set_data(self, gridOrigin):
         self.gridOrigin = gridOrigin
-
-    # def set_map(self, map):
-    #     self.map = map
 
     def set_ores_location(self, location):
       self.ores_location = location
@@ -105,12 +104,13 @@ class DumpTruck:
     def update(self, action):
       if np.array_equal(action, [1, 0, 0]):
         self.moveForward()
-      # todo: fix rotation
+
       elif np.array_equal(action, [0, 1, 0]):
-        self.rotate_to(1)
+        self.rotate_to(Turn.RIGHT)
         self.moveForward()
+
       elif np.array_equal(action, [0, 0, 1]):
-        self.rotate_to(-1)
+        self.rotate_to(Turn.LEFT)
         self.moveForward()
 
 
@@ -119,11 +119,6 @@ class DumpTruck:
       point_right = Point(self.X + 1, self.Y)
       point_up = Point(self.X, self.Y - 1)
       point_down = Point(self.X, self.Y + 1)
-
-      # dir_left = self.degree == Degree.LEFT
-      # dir_right = self.degree == Degree.RIGHT
-      # dir_up = self.degree == Degree.UP
-      # dir_down = self.degree == Degree.DOWN
 
       dir_left = self.direction == Direction.LEFT
       dir_right = self.direction == Direction.RIGHT
@@ -141,11 +136,6 @@ class DumpTruck:
       ore_right = ore.x > self.X
       ore_up = ore.y < self.Y
       ore_down = ore.y > self.Y
-
-      ore_dia_up_right = ore_up and ore_right
-      ore_dia_right_down = ore_right and ore_down
-      ore_dia_down_left = ore_down and ore_left
-      ore_dia_left_up = ore_left and ore_up
 
       state = [
         # danger (border) straight
@@ -168,10 +158,6 @@ class DumpTruck:
         ore_right,   # ore right
         ore_up,   # ore up
         ore_down,    # ore down
-        # ore_dia_up_right,
-        # ore_dia_right_down,
-        # ore_dia_down_left,
-        # ore_dia_left_up
       ]
       return np.array(state, dtype = int)
 
@@ -184,21 +170,8 @@ class DumpTruck:
         return True
 
       return False
+
     # def go_to_load(self):
-    #   # turning at borders of map
-    #   if self.angle == Angle.LEFT and self.X == 0:
-    #     self.turn_to(Angle.UP)
-    #
-    #   elif self.angle == Angle.UP and self.Y == 0:
-    #     self.turn_to(Angle.RIGHT)
-    #
-    #   elif self.angle == Angle.RIGHT and self.X == GRID_CELLS - 1:
-    #     self.turn_to(Angle.DOWN)
-    #
-    #   elif self.angle == Angle.DOWN and self.Y == GRID_CELLS - 1:
-    #     self.turn_to(Angle.LEFT)
-    #
-    #   self.moveForward()
 
     def moveRight(self):
       # if self.X < (GRID_CELLS - 1) and self.fuel_cells > 0:

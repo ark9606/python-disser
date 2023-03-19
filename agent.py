@@ -15,7 +15,7 @@ class Agent:
   def __init__(self, existing_model_file):
     self.simulations_number = 0
     self.epsilon = 0 # randomness
-    self.gamma = 0.9 # discount rate
+    self.gamma = 0.95 # discount rate
     self.memory = deque(maxlen=MAX_MEMORY)
     self.model = LinearQNet(11, 256, 3, existing_model_file) # 15 states, 3 actions
     self.trainer = QTrainer(self.model, learning_rate = LR, gamma = self.gamma)
@@ -64,6 +64,8 @@ class Agent:
 
 
 def train(existing_model_file):
+  # todo: move all before loop inside truck
+  # todo: in loop train each object
   plot_scores = []
   plot_mean_scores = []
   total_score = 0

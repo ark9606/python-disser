@@ -16,7 +16,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 7
+SPEED = 70
 
 
 class Simulation:
@@ -50,6 +50,7 @@ class Simulation:
           if obj:
             obj.update(action)
 
+    # todo: loop over all objects
     # 3. check if simulation is finished
     # temp check of finished for check training, todo: change this after train check
     # temp calc of reward for check training, todo: change this after train check
@@ -92,15 +93,6 @@ class Simulation:
       cellMAP.append(row)
     cellMAP[5][7] = self.truck
 
-    # truck1 = DumpTruck(10, 8)
-    # truck1.set_data(GRID_ORIGIN)
-    # cellMAP[10][8] = truck1
-
-    # cellMAP[15][15] = Ore(15, 15)
-    # self.place_ore(cellMAP, 15, 15)
-    # cellMAP[3][3] = Rock(3, 3)
-
-    # truck.set_map(cellMAP)
     return cellMAP
 
   def place_ore(self):
@@ -196,26 +188,3 @@ class Simulation:
         sys.exit()
       elif event.type == KEYDOWN and event.key == K_r:
         self.reset()
-
-  # def run(self):
-  #   self.running = True
-  #   self.logic_thread = th.Thread(target=self.run_logic, name='logic_thread')
-  #   self.logic_thread.start()
-  #
-  #   while self.running:
-  #     self.check_input()
-  #     self.update_ui()
-  #
-  # def run_logic(self):
-  #   iterations = 0
-  #   while self.running:
-  #     time.sleep(0.2)
-  #
-  #     for row in range(GRID_CELLS):
-  #       for column in range(GRID_CELLS):
-  #           obj = self.map[column][row]
-  #           if obj:
-  #             obj.update()
-  #     iterations += 1
-
-        
