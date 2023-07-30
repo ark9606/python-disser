@@ -1,6 +1,5 @@
 import constants as const
 import pygame
-import random
 
 GRID_ORIGIN = const.GRID_ORIGIN
 CELL_SIZE = const.CELL_SIZE

@@ -17,15 +17,15 @@ TRUCK_DEFAULT_FUEL_CELLS = 999999
 
 Point = namedtuple('Point', 'x, y')
 
-class Angle(IntEnum):
-  LEFT = 0
-  UP = -90
-  RIGHT = -180
-  DOWN = 90
-
-class Rotation(IntEnum):
-  LEFT = -90
-  RIGHT = 90
+# class Angle(IntEnum):
+#   LEFT = 0
+#   UP = -90
+#   RIGHT = -180
+#   DOWN = 90
+#
+# class Rotation(IntEnum):
+#   LEFT = -90
+#   RIGHT = 90
 
 class Degree(IntEnum):
   UP = 0

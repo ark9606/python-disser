@@ -61,8 +61,6 @@ class Agent:
     return final_move
 
 
-
-
 def train(existing_model_file):
   # todo: move all before loop inside truck
   # todo: in loop train each object
