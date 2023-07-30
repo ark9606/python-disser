@@ -29,12 +29,10 @@ class Simulation:
   
   def reset(self):
     # TODO: move to truck after train check
-    self.truck = DumpTruck(5, 7)
-    self.truck.set_data(GRID_ORIGIN)
     self.score = 0
     self.running = False
     self.ores_location = []
-    self.map = self.get_map()
+    self.map = self.generate_map()
     self.place_ore()
     self.frame_iteration = 0
 
@@ -84,13 +82,14 @@ class Simulation:
     return reward, finished, self.score
     
 
-  def get_map(self):
+  def generate_map(self):
     cellMAP = []
     for i in range(GRID_CELLS):
       row = []
       for k in range(GRID_CELLS):
         row.append(None)
       cellMAP.append(row)
+    self.truck = DumpTruck(5, 7)
     cellMAP[5][7] = self.truck
 
     return cellMAP

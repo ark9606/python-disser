@@ -87,6 +87,7 @@ class DumpTruck:
     def set_data(self, gridOrigin):
         self.gridOrigin = gridOrigin
 
+
     def set_ores_location(self, location):
       self.ores_location = location
 
@@ -174,22 +175,18 @@ class DumpTruck:
     # def go_to_load(self):
 
     def moveRight(self):
-      # if self.X < (GRID_CELLS - 1) and self.fuel_cells > 0:
       self.X += 1
       self.fuel_cells -= 1
 
     def moveLeft(self):
-      # if self.X > 0 and self.fuel_cells > 0:
       self.X -= 1
       self.fuel_cells -= 1
 
     def moveUp(self):
-      # if self.Y > 0 and self.fuel_cells > 0:
       self.Y -= 1
       self.fuel_cells -= 1
 
     def moveDown(self):
-      # if self.Y < (GRID_CELLS - 1) and self.fuel_cells > 0:
       self.Y += 1
       self.fuel_cells -= 1
 
@@ -203,19 +200,6 @@ class DumpTruck:
         self.moveLeft()
       elif self.direction == Direction.UP:
         self.moveUp()
-      # if self.degree == Degree.RIGHT:
-      #   self.moveRight()
-      # elif self.degree == Degree.DOWN:
-      #   self.moveDown()
-      # elif self.degree == Degree.LEFT:
-      #   self.moveLeft()
-      # elif self.degree == Degree.UP:
-      #   self.moveUp()
-    
-    def turn_to(self, new_angle):
-      rotate = (360 - int(self.angle) + int(new_angle))
-      self.angle = new_angle
-      self.img = pygame.transform.rotate(self.img, rotate)
 
     def rotate_to(self, new_direction):
       # rotate = (360 - int(self.degree) + int(new_degree))
