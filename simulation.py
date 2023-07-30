@@ -28,10 +28,8 @@ class Simulation:
 
   
   def reset(self):
-    # TODO: move to truck after train check
-    self.score = 0
-    self.running = False
-    self.ores_location = []
+    self.simulation_running = False
+    self.ores_location = [] # ores in all simulation
     self.map = self.generate_map()
     self.place_ore()
     self.frame_iteration = 0
@@ -46,7 +44,7 @@ class Simulation:
       for column in range(len(self.map[row])):
           obj = self.map[column][row]
           if obj:
-            obj.update(action)
+            obj.perform_action(action)
 
     # todo: loop over all objects
     # 3. check if simulation is finished
@@ -60,26 +58,26 @@ class Simulation:
       reward = -10
       reason = 'iter max' if self.frame_iteration > 200 else 'hit border'
       print('Reason', reason, 'iterations', self.frame_iteration)
-      return reward, finished, self.score
-    if self.score > 100:
+      return reward, finished, self.get_truck().score
+    if self.get_truck().score > 100:
       finished = True
       reward = 10
       reason = 'score max'
       print('Reason', reason, 'iterations', self.frame_iteration)
-      return reward, finished, self.score
+      return reward, finished, self.get_truck().score
 
     # 4. place new ore
     # todo make communication between trucks, and choose closer ore (on path)
     # todo: now truck is ON ore, change to being near the ore
     if self.get_truck().X == self.get_ore().X and self.get_truck().Y == self.get_ore().Y:
-      self.score += 1
+      self.get_truck().score += 1
       reward = 10
       self.frame_iteration = 0
       self.place_ore()
 
     self.update_ui()
     self.clock.tick(SPEED)
-    return reward, finished, self.score
+    return reward, finished, self.get_truck().score
     
 
   def generate_map(self):
@@ -120,7 +118,6 @@ class Simulation:
     curr_pos = self.ores_location[0]
     ore = self.map[curr_pos.x][curr_pos.y]
     return ore
-    # return self.map[15][15]
 
 
   def update_ui(self):
@@ -182,7 +179,7 @@ class Simulation:
   def check_input(self):
     for event in pygame.event.get():
       if event.type == pygame.QUIT or (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)):
-        self.running = False
+        self.simulation_running = False
         pygame.quit()
         sys.exit()
       elif event.type == KEYDOWN and event.key == K_r:

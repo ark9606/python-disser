@@ -82,7 +82,9 @@ class DumpTruck:
         # self.brain = FSM()
         # self.brain.push_state(STATE_GOTO_LOAD)
         # self.map = []
-        self.ores_location = []
+        self.ores_location = []  # ores in all simulation (same as in simulation class)
+        self.score = 0
+
 
     def set_data(self, gridOrigin):
         self.gridOrigin = gridOrigin
@@ -102,7 +104,7 @@ class DumpTruck:
       Y = GRID_ORIGIN[1] + (CELL_SIZE * self.Y)
       surf.blit(self.img, (X, Y))
 
-    def update(self, action):
+    def perform_action(self, action):
       if np.array_equal(action, [1, 0, 0]):
         self.moveForward()
 
@@ -162,6 +164,7 @@ class DumpTruck:
       ]
       return np.array(state, dtype = int)
 
+    # todo: could be extracted for all active transports
     def is_collision(self, point = None):
       if point is None:
         point = Point(self.X, self.Y)
