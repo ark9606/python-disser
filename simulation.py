@@ -88,18 +88,13 @@ class Simulation:
 
     self.map[x][y] = Ore(x, y)
     self.ores_location = [Point(x, y)]
+    # todo set to all objects
     self.get_truck().set_ores([Ore(x, y)])
 
 
   # temp method for check training, todo: remove this after train check
   def get_truck(self):
     return self.truck
-
-  # temp method for check training, todo: remove this after train check
-  def get_ore(self):
-    curr_pos = self.ores_location[0]
-    ore = self.map[curr_pos.x][curr_pos.y]
-    return ore
 
 
   def update_ui(self):
