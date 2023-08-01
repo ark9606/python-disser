@@ -71,9 +71,7 @@ class FSM:
 
 class DumpTruck:
     def __init__(self, X, Y):
-        # todo: change to pos: Point
-        self.X = X
-        self.Y = Y
+        self.pos = Point(X, Y)
         self.img = truckImg
         self.degree = Degree.UP
         self.direction = Direction.UP
@@ -100,8 +98,8 @@ class DumpTruck:
         return str(self.get_code())
     
     def draw(self, surf):
-      X = GRID_ORIGIN[0] + (CELL_SIZE * self.X)
-      Y = GRID_ORIGIN[1] + (CELL_SIZE * self.Y)
+      X = GRID_ORIGIN[0] + (CELL_SIZE * self.pos.x)
+      Y = GRID_ORIGIN[1] + (CELL_SIZE * self.pos.y)
       surf.blit(self.img, (X, Y))
 
     def perform_action(self, action):
@@ -140,7 +138,7 @@ class DumpTruck:
       # 4. place new ore
       # todo make communication between trucks, and choose closer ore (on path)
       # todo: now truck is ON ore, change to being near the ore
-      if self.X == self.get_ore().X and self.Y == self.get_ore().Y:
+      if self.pos.x == self.get_ore().X and self.pos.y == self.get_ore().Y:
         self.score += 1
         reward = 10
 
@@ -152,10 +150,10 @@ class DumpTruck:
 
 
     def get_state(self):
-      point_left = Point(self.X - 1, self.Y)
-      point_right = Point(self.X + 1, self.Y)
-      point_up = Point(self.X, self.Y - 1)
-      point_down = Point(self.X, self.Y + 1)
+      point_left = Point(self.pos.x - 1, self.pos.y)
+      point_right = Point(self.pos.x + 1, self.pos.y)
+      point_up = Point(self.pos.x, self.pos.y - 1)
+      point_down = Point(self.pos.x, self.pos.y + 1)
 
       dir_left = self.direction == Direction.LEFT
       dir_right = self.direction == Direction.RIGHT
@@ -169,10 +167,10 @@ class DumpTruck:
       border_right = (dir_right and self.is_collision(point_down)) or (dir_left and self.is_collision(point_up)) or (dir_up and self.is_collision(point_right)) or (dir_down and self.is_collision(point_left))
       border_left = (dir_right and self.is_collision(point_up)) or (dir_left and self.is_collision(point_down)) or (dir_up and self.is_collision(point_left)) or (dir_down and self.is_collision(point_right))
 
-      ore_left = ore.X < self.X
-      ore_right = ore.X > self.X
-      ore_up = ore.Y < self.Y
-      ore_down = ore.Y > self.Y
+      ore_left = ore.X < self.pos.x
+      ore_right = ore.X > self.pos.x
+      ore_up = ore.Y < self.pos.y
+      ore_down = ore.Y > self.pos.y
 
       state = [
         # danger (border) straight
@@ -201,7 +199,7 @@ class DumpTruck:
     # todo: could be extracted for all active transports
     def is_collision(self, point = None):
       if point is None:
-        point = Point(self.X, self.Y)
+        point = Point(self.pos.x, self.pos.y)
 
       # hits boundary
       if point.x > (GRID_CELLS - 1) or point.x < 0 or point.y > (GRID_CELLS - 1) or point.y < 0:
@@ -212,19 +210,19 @@ class DumpTruck:
     # def go_to_load(self):
 
     def moveRight(self):
-      self.X += 1
+      self.pos = Point(self.pos.x + 1, self.pos.y)
       self.fuel_cells -= 1
 
     def moveLeft(self):
-      self.X -= 1
+      self.pos = Point(self.pos.x - 1, self.pos.y)
       self.fuel_cells -= 1
 
     def moveUp(self):
-      self.Y -= 1
+      self.pos = Point(self.pos.x, self.pos.y - 1)
       self.fuel_cells -= 1
 
     def moveDown(self):
-      self.Y += 1
+      self.pos = Point(self.pos.x, self.pos.y + 1)
       self.fuel_cells -= 1
 
     

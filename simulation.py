@@ -24,15 +24,20 @@ class Simulation:
     self.display = pygame.display.set_mode(const.SCREENSIZE)
     pygame.display.set_caption('Simulation')
     self.clock = pygame.time.Clock()
+    self.actors = []
+    self.simulation_running = False
+    self.ores_location = [] # ores in all simulation
+    self.frame_iteration = 0
+    self.map = None
     self.reset()
 
   
   def reset(self):
     self.simulation_running = False
     self.ores_location = [] # ores in all simulation
+    self.frame_iteration = 0
     self.map = self.generate_map()
     self.place_ore()
-    self.frame_iteration = 0
 
   def make_step(self, action):
     self.frame_iteration += 1
@@ -70,6 +75,7 @@ class Simulation:
         row.append(None)
       cellMAP.append(row)
     self.truck = DumpTruck(5, 7)
+
     cellMAP[5][7] = self.truck
 
     return cellMAP
@@ -80,9 +86,9 @@ class Simulation:
       self.map[curr_pos.x][curr_pos.y] = None
 
     truck = self.get_truck()
-    x = truck.X
-    y = truck.Y
-    while x == truck.X and y == truck.Y:
+    x = truck.pos.x
+    y = truck.pos.y
+    while x == truck.pos.x and y == truck.pos.y:
       x = random.randint(0, GRID_CELLS - 1)
       y = random.randint(0, GRID_CELLS - 1)
 
