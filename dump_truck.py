@@ -237,7 +237,7 @@ class DumpTruck:
         self.moveLeft()
       elif self.direction == Direction.UP:
         self.moveUp()
-      print('I\'m on', self.X, self.Y)
+      # print('I\'m on', self.X, self.Y)
 
     def rotate_to(self, new_direction):
       # rotate = (360 - int(self.degree) + int(new_degree))
