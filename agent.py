@@ -16,9 +16,8 @@ class Agent:
     self.model = LinearQNet(11, 256, 3, existing_model_file) # 15 states, 3 actions
     self.trainer = QTrainer(self.model, learning_rate = LR, gamma = self.gamma)
 
-  def get_state(self, simulation):
-    # TODO get state inside truck
-    return simulation.get_truck().get_state()
+  # def get_state(self, simulation):
+  #   return simulation.get_truck().get_state()
 
   def remember(self, state, action, reward, next_state, done):
     # remove from left, if maxlen exceeded
