@@ -39,45 +39,30 @@ class Simulation:
     # 1. check user input
     self.check_input()
 
+
+    # now it works only for one truck, change to accumulate res from different trucks
+    reward = 0
+    finished = False
+    score = 0
+
     # 2. move (update state of objects)
     for row in range(len(self.map)):
       for column in range(len(self.map[row])):
           obj = self.map[column][row]
           if isinstance(obj, DumpTruck):
             obj.perform_action(action)
+            reward, finished, score = obj.calc_score(self.frame_iteration)
 
-    # todo: loop over all objects
-    # 3. check if simulation is finished
-    # temp check of finished for check training, todo: change this after train check
-    # temp calc of reward for check training, todo: change this after train check
-    reward = 0
-    finished = False
-    # meet the borders, TODO make depends on how big score (how far simulation goes)
-    if self.get_truck().is_collision(None) or self.frame_iteration > 100:
-      finished = True
-      reward = -10
-      reason = 'iter max' if self.frame_iteration > 200 else 'hit border'
-      print('Reason', reason, 'iterations', self.frame_iteration)
-      return reward, finished, self.get_truck().score
-    if self.get_truck().score > 100:
-      finished = True
-      reward = 10
-      reason = 'score max'
-      print('Reason', reason, 'iterations', self.frame_iteration)
-      return reward, finished, self.get_truck().score
+    if finished:
+      return reward, finished, score
 
-    # 4. place new ore
-    # todo make communication between trucks, and choose closer ore (on path)
-    # todo: now truck is ON ore, change to being near the ore
-    if self.get_truck().X == self.get_ore().X and self.get_truck().Y == self.get_ore().Y:
-      self.get_truck().score += 1
-      reward = 10
+    if reward > 0:
       self.frame_iteration = 0
       self.place_ore()
 
     self.update_ui()
     self.clock.tick(SPEED)
-    return reward, finished, self.get_truck().score
+    return reward, finished, score
     
 
   def generate_map(self):
