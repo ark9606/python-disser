@@ -82,7 +82,7 @@ class DumpTruck:
         # self.brain = FSM()
         # self.brain.push_state(STATE_GOTO_LOAD)
         # self.map = []
-        self.ores_location = []  # ores in all simulation (same as in simulation class)
+        self.ores = []  # ores in all simulation (same as in simulation class)
         self.score = 0
 
 
@@ -90,8 +90,8 @@ class DumpTruck:
         self.gridOrigin = gridOrigin
 
 
-    def set_ores_location(self, location):
-      self.ores_location = location
+    def set_ores(self, ores):
+      self.ores = ores
 
     def get_code(self):
         return GRID_CODE
@@ -116,6 +116,40 @@ class DumpTruck:
         self.rotate_to(Turn.LEFT)
         self.moveForward()
 
+    def calc_score(self, frame_iteration):
+      # 3. check if simulation is finished
+      # temp check of finished for check training, todo: change this after train check
+      # temp calc of reward for check training, todo: change this after train check
+      reward = 0
+      finished = False
+      # meet the borders
+      if self.is_collision(None) or frame_iteration > 100:
+        finished = True
+        reward = -10
+        reason = 'iter max' if frame_iteration > 200 else 'hit border'
+        print('Reason', reason, 'iterations', frame_iteration)
+        return reward, finished, self.score
+
+      if self.score > 100:
+        finished = True
+        reward = 10
+        reason = 'score max'
+        print('Reason', reason, 'iterations', frame_iteration)
+        return reward, finished, self.score
+
+      # 4. place new ore
+      # todo make communication between trucks, and choose closer ore (on path)
+      # todo: now truck is ON ore, change to being near the ore
+      if self.X == self.get_ore().X and self.Y == self.get_ore().Y:
+        self.score += 1
+        reward = 10
+
+      return reward, finished, self.score
+
+    def get_ore(self):
+      ore = self.ores[0]
+      return ore
+
 
     def get_state(self):
       point_left = Point(self.X - 1, self.Y)
@@ -129,16 +163,16 @@ class DumpTruck:
       dir_down = self.direction == Direction.DOWN
 
       # TODO change to array of ores
-      ore = self.ores_location[0]
+      ore = self.ores[0]
 
       border_straight = (dir_right and self.is_collision(point_right)) or (dir_left and self.is_collision(point_left)) or (dir_up and self.is_collision(point_up)) or (dir_down and self.is_collision(point_down))
       border_right = (dir_right and self.is_collision(point_down)) or (dir_left and self.is_collision(point_up)) or (dir_up and self.is_collision(point_right)) or (dir_down and self.is_collision(point_left))
       border_left = (dir_right and self.is_collision(point_up)) or (dir_left and self.is_collision(point_down)) or (dir_up and self.is_collision(point_left)) or (dir_down and self.is_collision(point_right))
 
-      ore_left = ore.x < self.X
-      ore_right = ore.x > self.X
-      ore_up = ore.y < self.Y
-      ore_down = ore.y > self.Y
+      ore_left = ore.X < self.X
+      ore_right = ore.X > self.X
+      ore_up = ore.Y < self.Y
+      ore_down = ore.Y > self.Y
 
       state = [
         # danger (border) straight

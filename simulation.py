@@ -16,7 +16,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 70
+SPEED = 90
 
 
 class Simulation:
@@ -43,7 +43,7 @@ class Simulation:
     for row in range(len(self.map)):
       for column in range(len(self.map[row])):
           obj = self.map[column][row]
-          if obj:
+          if isinstance(obj, DumpTruck):
             obj.perform_action(action)
 
     # todo: loop over all objects
@@ -104,9 +104,10 @@ class Simulation:
       x = random.randint(0, GRID_CELLS - 1)
       y = random.randint(0, GRID_CELLS - 1)
 
-    self.map[x][y] = Ore(x, y)
+    new_ore = Ore(x, y)
+    self.map[x][y] = new_ore
     self.ores_location = [Point(x, y)]
-    self.get_truck().set_ores_location(self.ores_location)
+    self.get_truck().set_ores([new_ore])
 
 
   # temp method for check training, todo: remove this after train check
