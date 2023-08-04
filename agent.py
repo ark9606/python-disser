@@ -90,6 +90,7 @@ def train(existing_model_file):
 
     if done:
       # train long memory (experience), plot result
+      print('- simulation.reset() from agent')
       simulation.reset()
       agent.simulations_number += 1
       agent.train_long_memory()

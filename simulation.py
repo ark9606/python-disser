@@ -16,7 +16,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 90
+SPEED = 120
 
 
 class Simulation:
@@ -24,15 +24,20 @@ class Simulation:
     self.display = pygame.display.set_mode(const.SCREENSIZE)
     pygame.display.set_caption('Simulation')
     self.clock = pygame.time.Clock()
+    self.actors = []
+    self.simulation_running = False
+    self.ores_location = [] # ores in all simulation
+    self.frame_iteration = 0
+    self.map = None
     self.reset()
 
   
   def reset(self):
     self.simulation_running = False
     self.ores_location = [] # ores in all simulation
+    self.frame_iteration = 0
     self.map = self.generate_map()
     self.place_ore()
-    self.frame_iteration = 0
 
   def make_step(self, action):
     self.frame_iteration += 1
@@ -72,8 +77,10 @@ class Simulation:
       for k in range(GRID_CELLS):
         row.append(None)
       cellMAP.append(row)
+
     self.truck = DumpTruck(5, 7)
     cellMAP[5][7] = self.truck
+    print('- truck placed at', self.truck.X, self.truck.Y)
 
     return cellMAP
 
@@ -92,18 +99,13 @@ class Simulation:
     new_ore = Ore(x, y)
     self.map[x][y] = new_ore
     self.ores_location = [Point(x, y)]
+    # todo set to all objects
     self.get_truck().set_ores([new_ore])
 
 
   # temp method for check training, todo: remove this after train check
   def get_truck(self):
     return self.truck
-
-  # temp method for check training, todo: remove this after train check
-  def get_ore(self):
-    curr_pos = self.ores_location[0]
-    ore = self.map[curr_pos.x][curr_pos.y]
-    return ore
 
 
   def update_ui(self):
