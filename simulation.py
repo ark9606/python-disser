@@ -116,6 +116,9 @@ class Simulation:
     return self.truck
 
 
+  def get_actors(self):
+    return self.actors
+
   def update_ui(self):
     self.display.fill(const.GREY)
     self.draw_grid(GRID_ORIGIN, const.GRID_SIZE, GRID_CELLS)
