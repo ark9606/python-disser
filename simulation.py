@@ -16,7 +16,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 70
+SPEED = 120
 
 
 class Simulation:
@@ -59,6 +59,9 @@ class Simulation:
             obj.perform_action(action)
             reward, finished, score = obj.calc_score(self.frame_iteration)
 
+    if finished:
+      return reward, finished, score
+
     if reward > 0:
       self.frame_iteration = 0
       self.place_ore()
@@ -78,6 +81,7 @@ class Simulation:
     self.truck = DumpTruck(5, 7)
     cellMAP[5][7] = self.truck
     self.actors.append(self.truck)
+    print('- truck placed at', self.truck.X, self.truck.Y)
 
     return cellMAP
 
@@ -87,13 +91,11 @@ class Simulation:
       curr_pos = self.ores_location[0]
       self.map[curr_pos.x][curr_pos.y] = None
 
-    # for actor in self.actors:
-
     new_ore_pos = Point(random.randint(0, GRID_CELLS - 1), random.randint(0, GRID_CELLS - 1))
     while True:
       same_pos_actor = None
       for actor in self.actors:
-        if actor.pos.x == new_ore_pos.x and actor.pos.y == new_ore_pos.y:
+        if actor.X == new_ore_pos.x and actor.Y == new_ore_pos.y:
           same_pos_actor = actor
           break
       if same_pos_actor:
