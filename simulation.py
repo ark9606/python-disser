@@ -33,6 +33,7 @@ class Simulation:
 
   
   def reset(self):
+    self.actors = []
     self.simulation_running = False
     self.ores_location = [] # ores in all simulation
     self.frame_iteration = 0
@@ -77,30 +78,37 @@ class Simulation:
       for k in range(GRID_CELLS):
         row.append(None)
       cellMAP.append(row)
-
     self.truck = DumpTruck(5, 7)
     cellMAP[5][7] = self.truck
+    self.actors.append(self.truck)
     print('- truck placed at', self.truck.X, self.truck.Y)
 
     return cellMAP
 
   def place_ore(self):
+    # removing previous ore, if needed
     if len(self.ores_location) > 0:
       curr_pos = self.ores_location[0]
       self.map[curr_pos.x][curr_pos.y] = None
 
-    truck = self.get_truck()
-    x = truck.X
-    y = truck.Y
-    while x == truck.X and y == truck.Y:
-      x = random.randint(0, GRID_CELLS - 1)
-      y = random.randint(0, GRID_CELLS - 1)
+    new_ore_pos = Point(random.randint(0, GRID_CELLS - 1), random.randint(0, GRID_CELLS - 1))
+    while True:
+      same_pos_actor = None
+      for actor in self.actors:
+        if actor.X == new_ore_pos.x and actor.Y == new_ore_pos.y:
+          same_pos_actor = actor
+          break
+      if same_pos_actor:
+        new_ore_pos = Point(random.randint(0, GRID_CELLS - 1), random.randint(0, GRID_CELLS - 1))
+      else:
+        break
 
-    new_ore = Ore(x, y)
-    self.map[x][y] = new_ore
-    self.ores_location = [Point(x, y)]
-    # todo set to all objects
-    self.get_truck().set_ores([new_ore])
+
+    new_ore = Ore(new_ore_pos.x, new_ore_pos.y)
+    self.map[new_ore_pos.x][new_ore_pos.y] = new_ore
+    self.ores_location = [new_ore_pos]
+    for actor in self.actors:
+      actor.set_ores([new_ore])
 
 
   # temp method for check training, todo: remove this after train check
