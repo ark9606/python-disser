@@ -80,6 +80,7 @@ def work(existing_model_file):
 
 
 if __name__ == '__main__':
-  train(None)
+  # train(None)
+  train(existing_model_file = './model_rocks_best_30.pth')
   # work(existing_model_file='model_450_iter.pth')
   # work(existing_model_file='model_15_inputs_251_iter.pth')

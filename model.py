@@ -12,8 +12,7 @@ class LinearQNet(nn.Module):
     self.linear2 = nn.Linear(hidden_size, output_size)
     # use already trained model from file
     if existing_model_file:
-      file_name = os.path.join('./model', existing_model_file)
-      self.load_state_dict(torch.load(file_name))
+      self.load_state_dict(torch.load(existing_model_file))
       self.eval()
 
   def forward(self, x):
