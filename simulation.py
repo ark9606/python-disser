@@ -16,11 +16,11 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 120
+SPEED = 150
 
 
 MAP_ORES_COUNT = 1
-MAP_ROCKS_COUNT = 5
+MAP_ROCKS_COUNT = 15
 MAP_TRUCKS_COUNT = 1
 
 class Simulation:
@@ -95,6 +95,8 @@ class Simulation:
       self.actors.append(truck)
       print('- truck placed at', truck.X, truck.Y)
 
+    for actor in self.actors:
+      actor.set_data(cell_map)
 
     # self.truck = DumpTruck(5, 7)
     # cellMAP[5][7] = self.truck

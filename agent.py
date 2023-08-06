@@ -13,7 +13,7 @@ class Agent:
     self.epsilon = 0 # randomness
     self.gamma = 0.95 # discount rate
     self.memory = deque(maxlen=MAX_MEMORY)
-    self.model = LinearQNet(11, 256, 3, existing_model_file) # 15 states, 3 actions
+    self.model = LinearQNet(14, 256, 3, existing_model_file) # 14 states, 3 actions
     self.trainer = QTrainer(self.model, learning_rate = LR, gamma = self.gamma)
 
   def remember(self, state, action, reward, next_state, done):

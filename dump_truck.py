@@ -3,6 +3,7 @@ import constants as const
 import pygame
 from enum import IntEnum
 from collections import namedtuple
+from blocks import Block
 
 GRID_CELLS = const.GRID_CELLS
 GRID_ORIGIN = const.GRID_ORIGIN
@@ -69,25 +70,22 @@ class FSM:
     def get_current_state(self):
         return self.states_stack[-1] if len(self.states_stack) > 0 else None
 
-class DumpTruck:
+class DumpTruck(Block):
     def __init__(self, X, Y):
-        # todo: change to pos: Point
-        self.X = X
-        self.Y = Y
-        self.img = truckImg
+        Block.__init__(self, X, Y, truckImg, const.GRID_CODE_ORE)
         self.degree = Degree.UP
         self.direction = Direction.UP
         self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
         self.activeState = None
         # self.brain = FSM()
         # self.brain.push_state(STATE_GOTO_LOAD)
-        # self.map = []
+        self.map = []
         self.ores = []  # ores in all simulation (same as in simulation class)
         self.score = 0
 
 
-    def set_data(self, gridOrigin):
-        self.gridOrigin = gridOrigin
+    def set_data(self, map):
+        self.map = map
 
 
     def set_ores(self, ores):
@@ -106,15 +104,15 @@ class DumpTruck:
 
     def perform_action(self, action):
       if np.array_equal(action, [1, 0, 0]):
-        self.moveForward()
+        self.move_forward()
 
       elif np.array_equal(action, [0, 1, 0]):
         self.rotate_to(Turn.RIGHT)
-        self.moveForward()
+        self.move_forward()
 
       elif np.array_equal(action, [0, 0, 1]):
         self.rotate_to(Turn.LEFT)
-        self.moveForward()
+        self.move_forward()
 
     def calc_score(self, frame_iteration):
       # 3. check if simulation is finished
@@ -122,12 +120,21 @@ class DumpTruck:
       # temp calc of reward for check training, todo: change this after train check
       reward = 0
       finished = False
-      # meet the borders
-      if self.is_collision(None) or frame_iteration > 100:
+      # meet the borders or meet rocks
+      curr_pos_block_code = self.get_block_code_at(None)
+      # print('curr_pos_block_code', curr_pos_block_code)
+      if self.is_collision(None) or curr_pos_block_code == const.GRID_CODE_ROCK or frame_iteration > 100:
         finished = True
         reward = -10
-        reason = 'iter max' if frame_iteration > 200 else 'hit border'
-        print('Reason', reason, 'iterations', frame_iteration)
+        reasons = []
+        if frame_iteration > 100:
+          reasons.append('max iter')
+        if self.is_collision(None):
+          reasons.append('hit border')
+        if self.get_block_code_at(None) == const.GRID_CODE_ROCK:
+          reasons.append('hit rock')
+
+        print('Iter count', frame_iteration, 'Reasons', reasons,)
         return reward, finished, self.score
 
       if self.score > 100:
@@ -162,12 +169,22 @@ class DumpTruck:
       dir_up = self.direction == Direction.UP
       dir_down = self.direction == Direction.DOWN
 
+      block_code_left = self.get_block_code_at(point_left)
+      block_code_right = self.get_block_code_at(point_right)
+      block_code_up = self.get_block_code_at(point_up)
+      block_code_down = self.get_block_code_at(point_down)
+
       # TODO change to array of ores
       ore = self.ores[0]
 
       border_straight = (dir_right and self.is_collision(point_right)) or (dir_left and self.is_collision(point_left)) or (dir_up and self.is_collision(point_up)) or (dir_down and self.is_collision(point_down))
       border_right = (dir_right and self.is_collision(point_down)) or (dir_left and self.is_collision(point_up)) or (dir_up and self.is_collision(point_right)) or (dir_down and self.is_collision(point_left))
       border_left = (dir_right and self.is_collision(point_up)) or (dir_left and self.is_collision(point_down)) or (dir_up and self.is_collision(point_left)) or (dir_down and self.is_collision(point_right))
+
+
+      rock_straight = (dir_right and block_code_right == const.GRID_CODE_ROCK) or (dir_left and block_code_left == const.GRID_CODE_ROCK) or (dir_up and block_code_up == const.GRID_CODE_ROCK) or (dir_down and block_code_down == const.GRID_CODE_ROCK)
+      rock_right = (dir_right and block_code_down == const.GRID_CODE_ROCK) or (dir_left and block_code_up == const.GRID_CODE_ROCK) or (dir_up and block_code_right == const.GRID_CODE_ROCK) or (dir_down and block_code_left == const.GRID_CODE_ROCK)
+      rock_left = (dir_right and block_code_up == const.GRID_CODE_ROCK) or (dir_left and block_code_down == const.GRID_CODE_ROCK) or (dir_up and block_code_left == const.GRID_CODE_ROCK) or (dir_down and block_code_right == const.GRID_CODE_ROCK)
 
       ore_left = ore.X < self.X
       ore_right = ore.X > self.X
@@ -183,6 +200,17 @@ class DumpTruck:
 
         # danger (border) left
         border_left,
+
+
+        # danger (rock) straight
+        rock_straight,
+
+        # danger (rock) right
+        rock_right,
+
+        # danger (rock) left
+        rock_left,
+
 
         # Move direction
         dir_left,
@@ -209,34 +237,72 @@ class DumpTruck:
 
       return False
 
+    def get_block_code_at(self, point):
+      if point is None:
+        point = Point(self.X, self.Y)
+
+      # hits boundary
+      if point.x > (GRID_CELLS - 1) or point.x < 0 or point.y > (GRID_CELLS - 1) or point.y < 0:
+        return None
+
+      code = self.map[point.x][point.y].get_code() if isinstance(self.map[point.x][point.y], Block) else None
+      return code
+
+    def get_next_block_code(self):
+      next_point = self.get_next_point()
+      return self.get_block_code_at(next_point)
+
+    def get_next_point(self):
+      if self.is_dir_left():
+        return Point(self.X - 1, self.Y)
+      if self.is_dir_right():
+        return Point(self.X + 1, self.Y)
+      if self.is_dir_up():
+        return Point(self.X, self.Y - 1)
+      return Point(self.X, self.Y + 1)
+
+
+
+    def is_dir_right(self):
+      return self.direction == Direction.RIGHT
+
+    def is_dir_left(self):
+      return self.direction == Direction.LEFT
+
+    def is_dir_up(self):
+      return self.direction == Direction.UP
+
+    def is_dir_down(self):
+      return self.direction == Direction.DOWN
+
     # def go_to_load(self):
 
-    def moveRight(self):
+    def move_right(self):
       self.X += 1
       self.fuel_cells -= 1
 
-    def moveLeft(self):
+    def move_left(self):
       self.X -= 1
       self.fuel_cells -= 1
 
-    def moveUp(self):
+    def move_up(self):
       self.Y -= 1
       self.fuel_cells -= 1
 
-    def moveDown(self):
+    def move_down(self):
       self.Y += 1
       self.fuel_cells -= 1
 
     
-    def moveForward(self):
+    def move_forward(self):
       if self.direction == Direction.RIGHT:
-        self.moveRight()
+        self.move_right()
       elif self.direction == Direction.DOWN:
-        self.moveDown()
+        self.move_down()
       elif self.direction == Direction.LEFT:
-        self.moveLeft()
+        self.move_left()
       elif self.direction == Direction.UP:
-        self.moveUp()
+        self.move_up()
       # print('I\'m on', self.X, self.Y)
 
     def rotate_to(self, new_direction):

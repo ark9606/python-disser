@@ -38,4 +38,4 @@ class Ore(Block):
 
 class Rock(Block):
     def __init__(self, X, Y):
-        Block.__init__(self, X, Y, rockImg, const.GRID_CODE_ORE)
+        Block.__init__(self, X, Y, rockImg, const.GRID_CODE_ROCK)
