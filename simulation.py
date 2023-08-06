@@ -76,26 +76,39 @@ class Simulation:
     
 
   def generate_map(self):
-    cellMAP = []
+    cell_map = []
     for i in range(GRID_CELLS):
       row = []
       for k in range(GRID_CELLS):
         row.append(None)
-      cellMAP.append(row)
+      cell_map.append(row)
 
-    # TODO: generate unique pairs
-    rocks_cords = random.sample(range(GRID_CELLS), MAP_ROCKS_COUNT * 2)
-    for i in range(0, MAP_ROCKS_COUNT, 2):
-      x = rocks_cords[i]
-      y = rocks_cords[i + 1]
-      cellMAP[x][y] = Rock(x, y)
+    all_coordinates = self.generate_coordinates(0, GRID_CELLS - 1, MAP_ROCKS_COUNT + MAP_TRUCKS_COUNT)
+    for i in range(0, MAP_ROCKS_COUNT):
+      x, y = all_coordinates.pop()
+      cell_map[x][y] = Rock(x, y)
 
-    self.truck = DumpTruck(5, 7)
-    cellMAP[5][7] = self.truck
-    self.actors.append(self.truck)
-    print('- truck placed at', self.truck.X, self.truck.Y)
+    for i in range(0, MAP_TRUCKS_COUNT):
+      x, y = all_coordinates.pop()
+      truck = DumpTruck(x, y)
+      cell_map[x][y] = truck
+      self.actors.append(truck)
+      print('- truck placed at', truck.X, truck.Y)
 
-    return cellMAP
+
+    # self.truck = DumpTruck(5, 7)
+    # cellMAP[5][7] = self.truck
+    # self.actors.append(self.truck)
+    # print('- truck placed at', self.truck.X, self.truck.Y)
+    return cell_map
+
+  def generate_coordinates(self, min, max, count):
+    coordinates = set()
+    while len(coordinates) < count:
+      x, y = random.randint(min, max), random.randint(min, max)
+      coordinates.add((x, y))
+    return coordinates
+
 
   def place_ore(self):
     # removing previous ore, if needed
@@ -122,10 +135,6 @@ class Simulation:
     for actor in self.actors:
       actor.set_ores([new_ore])
 
-
-  # temp method for check training, todo: remove this after train check
-  def get_truck(self):
-    return self.truck
 
 
   def get_actors(self):
