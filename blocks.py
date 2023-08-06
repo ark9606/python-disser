@@ -8,7 +8,7 @@ GRID_CODE = const.GRID_CODE_TRUCK
 oreImg = pygame.image.load('./static/ore.png')
 oreImg = pygame.transform.scale(oreImg, (CELL_SIZE, CELL_SIZE))
 
-rockImg = pygame.image.load('./static/rock.png')
+rockImg = pygame.image.load('./static/rock2.png')
 rockImg = pygame.transform.scale(rockImg, (CELL_SIZE, CELL_SIZE))
 
 class Block:

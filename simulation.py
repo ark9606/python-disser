@@ -19,6 +19,10 @@ LINE_COLOR = const.LINE_COLOR
 SPEED = 120
 
 
+MAP_ORES_COUNT = 1
+MAP_ROCKS_COUNT = 5
+MAP_TRUCKS_COUNT = 1
+
 class Simulation:
   def __init__(self):
     self.display = pygame.display.set_mode(const.SCREENSIZE)
@@ -78,6 +82,14 @@ class Simulation:
       for k in range(GRID_CELLS):
         row.append(None)
       cellMAP.append(row)
+
+    # TODO: generate unique pairs
+    rocks_cords = random.sample(range(GRID_CELLS), MAP_ROCKS_COUNT * 2)
+    for i in range(0, MAP_ROCKS_COUNT, 2):
+      x = rocks_cords[i]
+      y = rocks_cords[i + 1]
+      cellMAP[x][y] = Rock(x, y)
+
     self.truck = DumpTruck(5, 7)
     cellMAP[5][7] = self.truck
     self.actors.append(self.truck)
