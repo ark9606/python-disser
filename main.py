@@ -81,6 +81,6 @@ def work(existing_model_file):
 
 if __name__ == '__main__':
   # train(None)
-  train(existing_model_file = './model.pth')
-  # work(existing_model_file='model_450_iter.pth')
+  train(existing_model_file = './model_1306.pth')
+  # work(existing_model_file='model_1306.pth')
   # work(existing_model_file='model_15_inputs_251_iter.pth')

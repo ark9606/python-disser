@@ -16,7 +16,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 120
+SPEED = 180
 
 
 MAP_ORES_COUNT = 1
@@ -64,6 +64,8 @@ class Simulation:
             reward, finished, score = obj.calc_score(self.frame_iteration)
 
     if finished:
+      self.frame_iteration = 0
+      self.place_ore()
       return reward, finished, score
 
     if reward > 0:
@@ -83,7 +85,8 @@ class Simulation:
         row.append(None)
       cell_map.append(row)
 
-    all_coordinates = self.generate_coordinates(0, GRID_CELLS - 1, MAP_ROCKS_COUNT + MAP_TRUCKS_COUNT)
+    # all_coordinates = self.generate_coordinates(0, GRID_CELLS - 1, MAP_ROCKS_COUNT + MAP_TRUCKS_COUNT)
+    all_coordinates = {(28, 17), (7, 27), (24, 17), (16, 0), (26, 12), (19, 7), (7, 16), (12, 0), (9, 26), (7, 0), (14, 6), (29, 2), (4, 27), (21, 4), (6, 22), (20, 21)}
     for i in range(0, MAP_ROCKS_COUNT):
       x, y = all_coordinates.pop()
       cell_map[x][y] = Rock(x, y)
