@@ -2,6 +2,9 @@ import json
 import numpy as np
 from queue import PriorityQueue
 
+from blocks import Rock, Ore
+from dump_truck import DumpTruck
+
 
 class Graph:
   def __init__(self):
@@ -104,14 +107,49 @@ graph.add_edge('D', 'F', 1)
 graph.add_edge('D', 'E', 3)
 graph.add_edge('E', 'F', 1)
 
-print('\nGraph:')
-print(graph)
+# print('\nGraph:')
+# print(graph)
 
-print('\nShortest path from A to E:')
-print(graph.shortest_path('A', 'E'))
+# print('\nShortest path from A to E:')
+# print(graph.shortest_path('A', 'E'))
 
-print('\nShortest path from A to F:')
-print(graph.shortest_path('A', 'F'))
+# print('\nShortest path from A to F:')
+# print(graph.shortest_path('A', 'F'))
 
-print('\nShortest path from B to D:')
-print(graph.shortest_path('B', 'D'))
+# print('\nShortest path from B to D:')
+# print(graph.shortest_path('B', 'D'))
+
+
+# test graph
+SIZE = 5
+cell_map = []
+for i in range(SIZE):
+  row = []
+  for k in range(SIZE):
+    row.append(None)
+  cell_map.append(row)
+
+cell_map[2][1] = Rock(2, 1)
+cell_map[3][4] = Ore(2, 1)
+cell_map[0][0] = DumpTruck(0, 0)
+
+# generate graph from map
+map_graph = Graph()
+for r in range(SIZE):
+  for c in range(SIZE):
+    map_graph.add_vertex(str(r) + '.' + str(c))
+
+for r in range(SIZE):
+  for c in range(SIZE):
+    curr_vertex = str(r) + '.' + str(c)
+    right_vertex = str(r) + '.' + str(c + 1) if c < SIZE - 1 else None
+    down_vertex = str(r + 1) + '.' + str(c) if r < SIZE - 1 else None
+    if right_vertex:
+      if cell_map[r][c] is None and cell_map[r][c+1] is None:
+        map_graph.add_edge(curr_vertex, right_vertex, 1)
+    if down_vertex:
+      if cell_map[r][c] is None and cell_map[r+1][c] is None:
+        map_graph.add_edge(curr_vertex, down_vertex, 1)
+
+
+print(map_graph)
