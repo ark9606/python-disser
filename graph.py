@@ -1,6 +1,7 @@
 import json
 import numpy as np
 from queue import PriorityQueue
+import constants as const
 
 from blocks import Rock, Ore
 from dump_truck import DumpTruck
@@ -129,7 +130,9 @@ for i in range(SIZE):
     row.append(None)
   cell_map.append(row)
 
-cell_map[2][1] = Rock(2, 1)
+cell_map[1][4] = Rock(1, 4)
+cell_map[2][3] = Rock(2, 3)
+cell_map[3][2] = Rock(3, 2)
 cell_map[3][4] = Ore(2, 1)
 cell_map[0][0] = DumpTruck(0, 0)
 
@@ -141,15 +144,19 @@ for r in range(SIZE):
 
 for r in range(SIZE):
   for c in range(SIZE):
+    if cell_map[r][c] and cell_map[r][c].get_code() == const.GRID_CODE_ROCK:
+      continue
     curr_vertex = str(r) + '.' + str(c)
     right_vertex = str(r) + '.' + str(c + 1) if c < SIZE - 1 else None
     down_vertex = str(r + 1) + '.' + str(c) if r < SIZE - 1 else None
     if right_vertex:
-      if cell_map[r][c] is None and cell_map[r][c+1] is None:
+      if cell_map[r][c+1] is None or cell_map[r][c+1].get_code() == const.GRID_CODE_ORE:
         map_graph.add_edge(curr_vertex, right_vertex, 1)
+
     if down_vertex:
-      if cell_map[r][c] is None and cell_map[r+1][c] is None:
+      if cell_map[r+1][c] is None or cell_map[r+1][c].get_code() == const.GRID_CODE_ORE:
         map_graph.add_edge(curr_vertex, down_vertex, 1)
 
 
 print(map_graph)
+print(map_graph.shortest_path('0.0', '3.4'))
