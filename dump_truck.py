@@ -82,6 +82,7 @@ class DumpTruck(Block):
         self.map = []
         self.ores = []  # ores in all simulation (same as in simulation class)
         self.score = 0
+        self.graph = None
 
 
     def set_data(self, map):
@@ -90,6 +91,9 @@ class DumpTruck(Block):
 
     def set_ores(self, ores):
       self.ores = ores
+
+    def set_graph(self, graph):
+      self.graph = graph
 
     def get_code(self):
         return GRID_CODE
@@ -103,16 +107,27 @@ class DumpTruck(Block):
       surf.blit(self.img, (X, Y))
 
     def perform_action(self, action):
-      if np.array_equal(action, [1, 0, 0]):
-        self.move_forward()
+      self.move_by_algo()
+      # if np.array_equal(action, [1, 0, 0]):
+      #   self.move_forward()
+      #
+      # elif np.array_equal(action, [0, 1, 0]):
+      #   self.rotate_to(Turn.RIGHT)
+      #   self.move_forward()
+      #
+      # elif np.array_equal(action, [0, 0, 1]):
+      #   self.rotate_to(Turn.LEFT)
+      #   self.move_forward()
 
-      elif np.array_equal(action, [0, 1, 0]):
-        self.rotate_to(Turn.RIGHT)
-        self.move_forward()
+    def move_by_algo(self):
+      ore = self.ores[0]
+      vertex_end = str(ore.X) + '.' + str(ore.Y)
+      vertex_start = str(self.X) + '.' + str(self.Y)
+      path = self.graph.shortest_path(vertex_start, vertex_end)
+      next_cell = path[1].split('.')
+      self.X = int(next_cell[0])
+      self.Y = int(next_cell[1])
 
-      elif np.array_equal(action, [0, 0, 1]):
-        self.rotate_to(Turn.LEFT)
-        self.move_forward()
 
     def calc_score(self, frame_iteration):
       # 3. check if simulation is finished

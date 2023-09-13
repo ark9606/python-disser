@@ -6,6 +6,8 @@ import constants as const
 from dump_truck import DumpTruck
 from blocks import Ore, Rock
 import time
+
+from graph import Graph
 from utils import Point
 import random
 
@@ -16,7 +18,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 180
+SPEED = 30
 
 
 MAP_ORES_COUNT = 1
@@ -33,6 +35,7 @@ class Simulation:
     self.ores_location = [] # ores in all simulation
     self.frame_iteration = 0
     self.map = None
+    self.graph = None
     self.reset()
 
   
@@ -115,6 +118,28 @@ class Simulation:
     return coordinates
 
 
+  def build_graph(self):
+    map_graph = Graph()
+    for r in range(GRID_CELLS):
+      for c in range(GRID_CELLS):
+        map_graph.add_vertex(str(r) + '.' + str(c))
+
+    for r in range(GRID_CELLS):
+      for c in range(GRID_CELLS):
+        if self.map[r][c] and self.map[r][c].get_code() == const.GRID_CODE_ROCK:
+          continue
+        curr_vertex = str(r) + '.' + str(c)
+        right_vertex = str(r) + '.' + str(c + 1) if c < GRID_CELLS - 1 else None
+        down_vertex = str(r + 1) + '.' + str(c) if r < GRID_CELLS - 1 else None
+        if right_vertex:
+          if self.map[r][c + 1] is None or self.map[r][c + 1].get_code() == const.GRID_CODE_ORE:
+            map_graph.add_edge(curr_vertex, right_vertex, 1)
+
+        if down_vertex:
+          if self.map[r + 1][c] is None or self.map[r + 1][c].get_code() == const.GRID_CODE_ORE:
+            map_graph.add_edge(curr_vertex, down_vertex, 1)
+    return map_graph
+
   def place_ore(self):
     # removing previous ore, if needed
     if len(self.ores_location) > 0:
@@ -137,9 +162,11 @@ class Simulation:
     new_ore = Ore(new_ore_pos.x, new_ore_pos.y)
     self.map[new_ore_pos.x][new_ore_pos.y] = new_ore
     self.ores_location = [new_ore_pos]
+
+    graph = self.build_graph()
     for actor in self.actors:
       actor.set_ores([new_ore])
-
+      actor.set_graph(graph)
 
 
   def get_actors(self):
