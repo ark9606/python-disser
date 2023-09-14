@@ -125,8 +125,47 @@ class DumpTruck(Block):
       vertex_start = str(self.X) + '.' + str(self.Y)
       path = self.graph.shortest_path(vertex_start, vertex_end)
       next_cell = path[1].split('.')
-      self.X = int(next_cell[0])
-      self.Y = int(next_cell[1])
+      next_x = int(next_cell[0])
+      next_y = int(next_cell[1])
+
+      if self.is_dir_up():
+        if next_x < self.X:
+          self.rotate_to(Turn.LEFT)
+        elif next_x > self.X:
+          self.rotate_to(Turn.RIGHT)
+        # if next_y < self.Y:
+        #   self.rotate_to(Turn.RIGHT)
+        #   self.rotate_to(Turn.RIGHT)
+
+      elif self.is_dir_down():
+        if next_x < self.X:
+          self.rotate_to(Turn.RIGHT)
+        elif next_x > self.X:
+          self.rotate_to(Turn.LEFT)
+        # if next_y > self.Y:
+        #   self.rotate_to(Turn.RIGHT)
+        #   self.rotate_to(Turn.RIGHT)
+
+      elif self.is_dir_left():
+        if next_y < self.Y:
+          self.rotate_to(Turn.RIGHT)
+        elif next_y > self.Y:
+          self.rotate_to(Turn.LEFT)
+        # if next_x > self.X:
+        #   self.rotate_to(Turn.RIGHT)
+        #   self.rotate_to(Turn.RIGHT)
+
+      elif self.is_dir_right():
+        if next_y < self.Y:
+          self.rotate_to(Turn.LEFT)
+        elif next_y > self.Y:
+          self.rotate_to(Turn.RIGHT)
+        if next_x < self.X:
+          self.rotate_to(Turn.RIGHT)
+          self.rotate_to(Turn.RIGHT)
+
+      self.X = next_x
+      self.Y = next_y
 
 
     def calc_score(self, frame_iteration):
