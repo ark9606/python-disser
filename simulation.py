@@ -3,6 +3,7 @@ import threading as th
 import pygame
 from pygame.locals import KEYDOWN, K_q, K_r, K_ESCAPE
 import constants as const
+import map as map
 from dump_truck import DumpTruck
 from blocks import Ore, Rock
 import time
@@ -44,7 +45,8 @@ class Simulation:
     self.simulation_running = False
     self.ores_location = [] # ores in all simulation
     self.frame_iteration = 0
-    self.map = self.generate_map()
+    # self.map = self.generate_map()
+    self.map = self.init_map()
     self.place_ore()
 
   def make_step(self, action):
@@ -80,6 +82,25 @@ class Simulation:
     return reward, finished, score
     
 
+  def init_map(self):
+    cell_map = map.GRID
+
+    for r in range(GRID_CELLS):
+      for c in range(GRID_CELLS):
+        if cell_map[r][c] == 0:
+          cell_map[r][c] = None
+        elif cell_map[r][c] == const.GRID_CODE_ROCK:
+          cell_map[r][c] = Rock(r, c)
+        elif cell_map[r][c] == const.GRID_CODE_TRUCK:
+          truck = DumpTruck(r, c)
+          cell_map[r][c] = truck
+          self.actors.append(truck)
+
+    for actor in self.actors:
+      actor.set_data(cell_map)
+
+    return cell_map
+
   def generate_map(self):
     cell_map = []
     for i in range(GRID_CELLS):
@@ -104,10 +125,6 @@ class Simulation:
     for actor in self.actors:
       actor.set_data(cell_map)
 
-    # self.truck = DumpTruck(5, 7)
-    # cellMAP[5][7] = self.truck
-    # self.actors.append(self.truck)
-    # print('- truck placed at', self.truck.X, self.truck.Y)
     return cell_map
 
   def generate_coordinates(self, min, max, count):
@@ -236,3 +253,5 @@ class Simulation:
         sys.exit()
       elif event.type == KEYDOWN and event.key == K_r:
         self.reset()
+
+

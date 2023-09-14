@@ -158,5 +158,5 @@ for r in range(SIZE):
         map_graph.add_edge(curr_vertex, down_vertex, 1)
 
 
-print(map_graph)
-print(map_graph.shortest_path('0.0', '3.4'))
+# print(map_graph)
+# print(map_graph.shortest_path('0.0', '3.4'))
