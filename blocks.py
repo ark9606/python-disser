@@ -1,4 +1,5 @@
 import constants as const
+from utils import Point
 import pygame
 
 GRID_ORIGIN = const.GRID_ORIGIN
@@ -10,6 +11,9 @@ oreImg = pygame.transform.scale(oreImg, (CELL_SIZE, CELL_SIZE))
 
 rockImg = pygame.image.load('./static/rock3.png')
 rockImg = pygame.transform.scale(rockImg, (CELL_SIZE, CELL_SIZE))
+
+unloadImg = pygame.image.load('./static/unload2.png')
+unloadImg = pygame.transform.scale(unloadImg, (CELL_SIZE, CELL_SIZE))
 
 class Block:
     def __init__(self, X, Y, img, code):
@@ -32,6 +36,9 @@ class Block:
     def update(self, action = None):
         pass
 
+    def point(self):
+        return Point(self.X, self.Y)
+
 class Ore(Block):
     def __init__(self, X, Y):
         Block.__init__(self, X, Y, oreImg, const.GRID_CODE_ORE)
@@ -39,3 +46,7 @@ class Ore(Block):
 class Rock(Block):
     def __init__(self, X, Y):
         Block.__init__(self, X, Y, rockImg, const.GRID_CODE_ROCK)
+
+class Unload(Block):
+    def __init__(self, X, Y):
+        Block.__init__(self, X, Y, unloadImg, const.GRID_CODE_UNLOAD)

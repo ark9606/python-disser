@@ -5,7 +5,7 @@ from pygame.locals import KEYDOWN, K_q, K_r, K_ESCAPE
 import constants as const
 import map as map
 from dump_truck import DumpTruck
-from blocks import Ore, Rock
+from blocks import Ore, Rock, Unload
 import time
 
 from graph import Graph
@@ -91,6 +91,8 @@ class Simulation:
           cell_map[r][c] = None
         elif cell_map[r][c] == const.GRID_CODE_ROCK:
           cell_map[r][c] = Rock(r, c)
+        elif cell_map[r][c] == const.GRID_CODE_UNLOAD:
+          cell_map[r][c] = Unload(r, c)
         elif cell_map[r][c] == const.GRID_CODE_TRUCK:
           truck = DumpTruck(r, c)
           cell_map[r][c] = truck
@@ -183,6 +185,7 @@ class Simulation:
     graph = self.build_graph()
     for actor in self.actors:
       actor.set_ores([new_ore])
+      # todo move to any step to handle collisions with other trucks
       actor.set_graph(graph)
 
 

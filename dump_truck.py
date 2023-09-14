@@ -52,9 +52,9 @@ STATE_GOTO_THROW = 4
 STATE_THROW_WEIGHT = 5
 
 # actions
-# [1, 0, 0] - straight
-# [0, 1, 0] - right
-# [0, 0, 1] - left
+# [1, 0, 0] - go to unload
+# [0, 1, 0] - go to ore
+# [0, 0, 1] - idle
 class FSM:
     def __init__(self):
         self.states_stack = []
@@ -77,16 +77,25 @@ class DumpTruck(Block):
         self.direction = Direction.UP
         self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
         self.activeState = None
+        self.loaded = 0 # percent of load (max 100)
         # self.brain = FSM()
         # self.brain.push_state(STATE_GOTO_LOAD)
         self.map = []
         self.ores = []  # ores in all simulation (same as in simulation class)
         self.score = 0
         self.graph = None
+        self.unload = None
 
 
     def set_data(self, map):
-        self.map = map
+      self.map = map
+      for r in range(len(map)):
+        for c in range(len(map[r])):
+          if map[r][c] == const.GRID_CODE_UNLOAD:
+            self.unload = map[r][c]
+            break
+
+
 
 
     def set_ores(self, ores):
@@ -107,7 +116,17 @@ class DumpTruck(Block):
       surf.blit(self.img, (X, Y))
 
     def perform_action(self, action):
-      self.move_by_algo()
+      print(action)
+      # if np.array_equal(action, [0, 0, 1]):
+      #   pass
+        # idle
+
+      if np.array_equal(action, [1, 0]):
+        self.go_to_by_algo(self.ores[0])
+
+      elif np.array_equal(action, [0, 1]) and self.unload:
+        self.go_to_by_algo(self.unload)
+
       # if np.array_equal(action, [1, 0, 0]):
       #   self.move_forward()
       #
@@ -119,9 +138,8 @@ class DumpTruck(Block):
       #   self.rotate_to(Turn.LEFT)
       #   self.move_forward()
 
-    def move_by_algo(self):
-      ore = self.ores[0]
-      vertex_end = str(ore.X) + '.' + str(ore.Y)
+    def go_to_by_algo(self, point):
+      vertex_end = str(point.X) + '.' + str(point.Y)
       vertex_start = str(self.X) + '.' + str(self.Y)
       path = self.graph.shortest_path(vertex_start, vertex_end)
       next_cell = path[1].split('.')
@@ -177,7 +195,7 @@ class DumpTruck(Block):
       # meet the borders or meet rocks
       curr_pos_block_code = self.get_block_code_at(None)
       # print('curr_pos_block_code', curr_pos_block_code)
-      if self.is_collision(None) or curr_pos_block_code == const.GRID_CODE_ROCK or frame_iteration > 100:
+      if (self.loaded > 100 and curr_pos_block_code == const.GRID_CODE_ROCK) or frame_iteration > 100:
         finished = True
         reward = -10
         reasons = []
@@ -193,16 +211,24 @@ class DumpTruck(Block):
 
       if self.score > 100:
         finished = True
-        reward = 10
+        self.score += 1
+        self.loaded = 0
         reason = 'score max'
         print('Reason', reason, 'iterations', frame_iteration)
+        return reward, finished, self.score
+
+      if self.unload and self.loaded == 100 and self.X == self.unload.point().X and self.Y == self.unload.point().Y:
+        reward = 10
+        self.score +=1
+        self.loaded = 0
         return reward, finished, self.score
 
       # 4. place new ore
       # todo make communication between trucks, and choose closer ore (on path)
       # todo: now truck is ON ore, change to being near the ore
-      if self.X == self.get_ore().X and self.Y == self.get_ore().Y:
+      if self.loaded == 0 and self.X == self.get_ore().X and self.Y == self.get_ore().Y:
         self.score += 1
+        self.loaded += 100
         reward = 10
 
       return reward, finished, self.score
@@ -246,37 +272,38 @@ class DumpTruck(Block):
       ore_down = ore.Y > self.Y
 
       state = [
-        # danger (border) straight
-        border_straight,
-
-        # danger (border) right
-        border_right,
-
-        # danger (border) left
-        border_left,
-
-
-        # danger (rock) straight
-        rock_straight,
-
-        # danger (rock) right
-        rock_right,
-
-        # danger (rock) left
-        rock_left,
-
-
-        # Move direction
-        dir_left,
-        dir_right,
-        dir_up,
-        dir_down,
-
-        # Ore location
-        ore_left,   # ore left
-        ore_right,   # ore right
-        ore_up,   # ore up
-        ore_down,    # ore down
+        self.loaded == 100
+        # # danger (border) straight
+        # border_straight,
+        #
+        # # danger (border) right
+        # border_right,
+        #
+        # # danger (border) left
+        # border_left,
+        #
+        #
+        # # danger (rock) straight
+        # rock_straight,
+        #
+        # # danger (rock) right
+        # rock_right,
+        #
+        # # danger (rock) left
+        # rock_left,
+        #
+        #
+        # # Move direction
+        # dir_left,
+        # dir_right,
+        # dir_up,
+        # dir_down,
+        #
+        # # Ore location
+        # ore_left,   # ore left
+        # ore_right,   # ore right
+        # ore_up,   # ore up
+        # ore_down,    # ore down
       ]
       return np.array(state, dtype = int)
 
@@ -329,7 +356,6 @@ class DumpTruck(Block):
     def is_dir_down(self):
       return self.direction == Direction.DOWN
 
-    # def go_to_load(self):
 
     def move_right(self):
       self.X += 1
