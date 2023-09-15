@@ -158,11 +158,11 @@ class Simulation:
         right_vertex = str(r) + '.' + str(c + 1) if c < GRID_CELLS - 1 else None
         down_vertex = str(r + 1) + '.' + str(c) if r < GRID_CELLS - 1 else None
         if right_vertex:
-          if self.map[r][c + 1] is None or self.map[r][c + 1].get_code() == const.GRID_CODE_ORE:
+          if self.map[r][c + 1] is None or self.map[r][c + 1].get_code() == const.GRID_CODE_ORE or self.map[r][c + 1].get_code() == const.GRID_CODE_UNLOAD:
             map_graph.add_edge(curr_vertex, right_vertex, 1)
 
         if down_vertex:
-          if self.map[r + 1][c] is None or self.map[r + 1][c].get_code() == const.GRID_CODE_ORE:
+          if self.map[r + 1][c] is None or self.map[r + 1][c].get_code() == const.GRID_CODE_ORE or self.map[r + 1][c].get_code() == const.GRID_CODE_UNLOAD:
             map_graph.add_edge(curr_vertex, down_vertex, 1)
     return map_graph
 

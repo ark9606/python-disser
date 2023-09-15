@@ -93,7 +93,7 @@ class DumpTruck(Block):
       self.map = map
       for r in range(len(map)):
         for c in range(len(map[r])):
-          if map[r][c] == const.GRID_CODE_UNLOAD:
+          if map[r][c] and map[r][c].get_code() == const.GRID_CODE_UNLOAD:
             self.unload = map[r][c]
             break
 
@@ -118,17 +118,19 @@ class DumpTruck(Block):
       surf.blit(self.img, (X, Y))
 
     def perform_action(self, action):
-      # print(action)
-      # if np.array_equal(action, [0, 0, 1]):
-      #   pass
-        # idle
-
-      if np.array_equal(action, [1, 0, 0]):
+      print('unload', self.loaded)
+      if self.loaded < 100:
         self.go_to_ore()
-
-      elif np.array_equal(action, [0, 1, 0]) and self.unload:
+      else:
         self.go_to_by_algo(self.unload)
-        self.aim = const.GRID_CODE_UNLOAD
+
+
+      # if np.array_equal(action, [1, 0, 0]):
+      #   self.go_to_ore()
+      #
+      # elif np.array_equal(action, [0, 1, 0]) and self.unload:
+      #   self.go_to_by_algo(self.unload)
+      #   self.aim = const.GRID_CODE_UNLOAD
 
 
       # if np.array_equal(action, [1, 0, 0]):
@@ -149,6 +151,7 @@ class DumpTruck(Block):
         self.loaded = 100
 
     def go_to_by_algo(self, point):
+      print('go_to_by_algo unload', point)
       vertex_end = str(point.X) + '.' + str(point.Y)
       vertex_start = str(self.X) + '.' + str(self.Y)
       path = self.graph.shortest_path(vertex_start, vertex_end)
@@ -210,6 +213,7 @@ class DumpTruck(Block):
       curr_pos_block_code = self.get_block_code_at(None)
       # print('curr_pos_block_code', curr_pos_block_code)
 
+      return reward, finished, self.score
 
       prev_aim = prev_state[2]
       curr_aim = self.aim
