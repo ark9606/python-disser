@@ -85,6 +85,8 @@ class DumpTruck(Block):
         self.score = 0
         self.graph = None
         self.unload = None
+        self.path_to_aim = []
+        self.aim = None
 
 
     def set_data(self, map):
@@ -116,16 +118,18 @@ class DumpTruck(Block):
       surf.blit(self.img, (X, Y))
 
     def perform_action(self, action):
-      print(action)
+      # print(action)
       # if np.array_equal(action, [0, 0, 1]):
       #   pass
         # idle
 
-      if np.array_equal(action, [1, 0]):
-        self.go_to_by_algo(self.ores[0])
+      if np.array_equal(action, [1, 0, 0]):
+        self.go_to_ore()
 
-      elif np.array_equal(action, [0, 1]) and self.unload:
+      elif np.array_equal(action, [0, 1, 0]) and self.unload:
         self.go_to_by_algo(self.unload)
+        self.aim = const.GRID_CODE_UNLOAD
+
 
       # if np.array_equal(action, [1, 0, 0]):
       #   self.move_forward()
@@ -138,10 +142,20 @@ class DumpTruck(Block):
       #   self.rotate_to(Turn.LEFT)
       #   self.move_forward()
 
+    def go_to_ore(self):
+      self.aim = const.GRID_CODE_ORE
+      self.go_to_by_algo(self.ores[0])
+      if len(self.path_to_aim) == 0:
+        self.loaded = 100
+
     def go_to_by_algo(self, point):
       vertex_end = str(point.X) + '.' + str(point.Y)
       vertex_start = str(self.X) + '.' + str(self.Y)
       path = self.graph.shortest_path(vertex_start, vertex_end)
+      if len(path) < 2:
+        self.path_to_aim = []
+        return
+      self.path_to_aim = path
       next_cell = path[1].split('.')
       next_x = int(next_cell[0])
       next_y = int(next_cell[1])
@@ -186,7 +200,7 @@ class DumpTruck(Block):
       self.Y = next_y
 
 
-    def calc_score(self, frame_iteration):
+    def calc_score(self, frame_iteration, prev_state):
       # 3. check if simulation is finished
       # temp check of finished for check training, todo: change this after train check
       # temp calc of reward for check training, todo: change this after train check
@@ -195,6 +209,49 @@ class DumpTruck(Block):
       # meet the borders or meet rocks
       curr_pos_block_code = self.get_block_code_at(None)
       # print('curr_pos_block_code', curr_pos_block_code)
+
+
+      prev_aim = prev_state[2]
+      curr_aim = self.aim
+
+      prev_path_to_aim = prev_state[1]
+      curr_path_to_aim = self.path_to_aim
+
+      prev_loaded = prev_state[0]
+      curr_loaded = self.loaded
+
+      print('curr_aim', curr_aim, 'curr_loaded', curr_loaded)
+      # aim
+      if curr_loaded < 100 and curr_aim and curr_aim == const.GRID_CODE_ORE:
+        reward += 10
+        self.score += 1
+      elif curr_loaded == 100 and curr_aim and curr_aim != const.GRID_CODE_UNLOAD:
+        reward -= 10
+        finished = True
+        return reward, finished, self.score
+
+
+      # if curr_aim == const.GRID_CODE_UNLOAD:
+      #   if curr_loaded == 100:
+      #     reward += 10
+
+      # movement
+      if prev_aim == curr_aim:
+        if len(curr_path_to_aim) < len(prev_path_to_aim):
+          reward += 10
+          if len(curr_path_to_aim) <= 1:
+            reward += 20
+            # todo it somewhere in the action
+            # self.loaded = 100
+            # finished = True
+        else:
+          reward -= 10
+      elif curr_aim == const.GRID_CODE_UNLOAD:
+        print('CHANGED AIM')
+
+      return reward, finished, self.score
+
+
       if (self.loaded > 100 and curr_pos_block_code == const.GRID_CODE_ROCK) or frame_iteration > 100:
         finished = True
         reward = -10
@@ -237,6 +294,9 @@ class DumpTruck(Block):
       ore = self.ores[0]
       return ore
 
+
+    def get_local_state(self):
+      return [self.loaded, self.path_to_aim, self.aim]
 
     def get_state(self):
       point_left = Point(self.X - 1, self.Y)

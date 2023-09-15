@@ -65,17 +65,24 @@ class Simulation:
       for column in range(len(self.map[row])):
           obj = self.map[column][row]
           if isinstance(obj, DumpTruck):
+            prev_state = obj.get_local_state()
             obj.perform_action(action)
-            reward, finished, score = obj.calc_score(self.frame_iteration)
+            reward, finished, score = obj.calc_score(self.frame_iteration, prev_state)
 
     if finished:
       self.frame_iteration = 0
       self.place_ore()
-      return reward, finished, score
+      # return reward, finished, score
 
-    if reward > 0:
-      self.frame_iteration = 0
-      self.place_ore()
+    # if reward == 20:
+    #   print('GOT 20')
+    #   self.frame_iteration = 0
+    #   self.place_ore()
+    #   return reward, finished, score
+
+    # if reward > 0:
+    #   self.frame_iteration = 0
+    #   self.place_ore()
 
     self.update_ui()
     self.clock.tick(SPEED)

@@ -14,7 +14,7 @@ class Agent:
     self.gamma = 0.95 # discount rate
     self.memory = deque(maxlen=MAX_MEMORY)
     # self.model = LinearQNet(14, 256, 3, existing_model_file) # 14 states, 3 actions
-    self.model = LinearQNet(1, 256, 2, existing_model_file) # 1 states, 3 actions
+    self.model = LinearQNet(1, 256, 3, existing_model_file) # 1 states, 3 actions
     self.trainer = QTrainer(self.model, learning_rate = LR, gamma = self.gamma)
 
   def remember(self, state, action, reward, next_state, done):
@@ -37,8 +37,8 @@ class Agent:
   def get_action_for_training(self, state):
     # random moves: tradeoff exploration / exploitation
     self.epsilon = 80 - self.simulations_number # as more simulations -> less epsilon -> less random moves
-    # final_move = [0, 0, 0]
-    final_move = [0, 0]
+    final_move = [0, 0, 0]
+    # final_move = [0, 0]
     if random.randint(0, 200) < self.epsilon:
       ind = random.randint(0, 1)
       final_move[ind] = 1
