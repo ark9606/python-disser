@@ -46,8 +46,8 @@ class Simulation:
     self.ores_location = [] # ores in all simulation
     self.frame_iteration = 0
     # self.map = self.generate_map()
-    self.map = self.init_map()
-    self.place_ore()
+    self.init_map()
+    # self.place_ore()
 
   def make_step(self, action):
     self.frame_iteration += 1
@@ -92,6 +92,8 @@ class Simulation:
   def init_map(self):
     cell_map = map.GRID
 
+    ores_location = []
+    ores = []
     for r in range(GRID_CELLS):
       for c in range(GRID_CELLS):
         if cell_map[r][c] == 0:
@@ -100,15 +102,33 @@ class Simulation:
           cell_map[r][c] = Rock(r, c)
         elif cell_map[r][c] == const.GRID_CODE_UNLOAD:
           cell_map[r][c] = Unload(r, c)
+        elif cell_map[r][c] == const.GRID_CODE_ORE:
+          cell_map[r][c] = Ore(r, c)
+          ores_location.append(Point(r, c))
+          ores.append(cell_map[r][c])
         elif cell_map[r][c] == const.GRID_CODE_TRUCK:
           truck = DumpTruck(r, c)
           cell_map[r][c] = truck
           self.actors.append(truck)
 
+    self.map = cell_map
+    graph = self.build_graph()
+
     for actor in self.actors:
       actor.set_data(cell_map)
+      actor.set_ores(ores)
+      actor.set_graph(graph)
 
-    return cell_map
+    # new_ore = Ore(new_ore_pos.x, new_ore_pos.y)
+    # self.map[new_ore_pos.x][new_ore_pos.y] = new_ore
+    # self.ores_location = [new_ore_pos]
+
+    # for actor in self.actors:
+    #   actor.set_ores([new_ore])
+    #   todo move to any step to handle collisions with other trucks
+      # actor.set_graph(graph)
+
+    # return cell_map
 
   def generate_map(self):
     cell_map = []

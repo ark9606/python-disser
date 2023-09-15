@@ -97,9 +97,6 @@ class DumpTruck(Block):
             self.unload = map[r][c]
             break
 
-
-
-
     def set_ores(self, ores):
       self.ores = ores
 
@@ -122,7 +119,7 @@ class DumpTruck(Block):
       if self.loaded < 100:
         self.go_to_ore()
       else:
-        self.go_to_by_algo(self.unload)
+        self.go_to_unload()
 
 
       # if np.array_equal(action, [1, 0, 0]):
@@ -150,8 +147,13 @@ class DumpTruck(Block):
       if len(self.path_to_aim) == 0:
         self.loaded = 100
 
+    def go_to_unload(self):
+      self.aim = const.GRID_CODE_UNLOAD
+      self.go_to_by_algo(self.unload)
+      if len(self.path_to_aim) == 0:
+        self.loaded = 0
+
     def go_to_by_algo(self, point):
-      print('go_to_by_algo unload', point)
       vertex_end = str(point.X) + '.' + str(point.Y)
       vertex_start = str(self.X) + '.' + str(self.Y)
       path = self.graph.shortest_path(vertex_start, vertex_end)
