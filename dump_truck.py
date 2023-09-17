@@ -10,7 +10,7 @@ GRID_ORIGIN = const.GRID_ORIGIN
 CELL_SIZE = const.CELL_SIZE
 GRID_CODE = const.GRID_CODE_TRUCK
 
-truckImg = pygame.image.load('./static/truck3.png')
+truckImg = pygame.image.load('./static/truck6.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
 TRUCK_DEFAULT_FUEL_CELLS = 999999
@@ -100,10 +100,6 @@ class DumpTruck(Block):
             ores.append(map[r][c])
       self.ores = ores
 
-            # break
-
-    # def set_ores(self, ores):
-    #   self.ores = ores
 
     def set_graph(self, graph):
       self.graph = graph
@@ -120,7 +116,7 @@ class DumpTruck(Block):
       surf.blit(self.img, (X, Y))
 
     def perform_action(self, action):
-      print('unload', self.loaded)
+      # print('unload', self.loaded)
       if self.loaded < 100:
         self.go_to_ore()
       else:
@@ -153,7 +149,7 @@ class DumpTruck(Block):
         path = self.find_path(self, ore)
         ores_list.append({'ore': ore, 'path': path})
 
-      ores_list.sort(key=lambda x: len(x['path']))
+      ores_list.sort(key = lambda x: len(x['path']))
       aim_ore = None
       for ore in ores_list:
         if ore['ore'].amount >= (100 - self.loaded):

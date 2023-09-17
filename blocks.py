@@ -42,7 +42,11 @@ class Block:
 class Ore(Block):
     def __init__(self, X, Y):
         Block.__init__(self, X, Y, oreImg, const.GRID_CODE_ORE)
-        self.amount = 1000
+        self.amount = 500
+
+    def __repr__(self):
+        return 'ore(' + str(self.get_code()) + ') <amount ' + str(self.amount) + '>'
+
 
 class Rock(Block):
     def __init__(self, X, Y):

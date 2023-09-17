@@ -19,7 +19,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 15
+SPEED = 5
 
 
 MAP_ORES_COUNT = 1
@@ -64,17 +64,21 @@ class Simulation:
     for row in range(len(self.map)):
       for column in range(len(self.map[row])):
           obj = self.map[column][row]
+          # print(obj)
           if isinstance(obj, DumpTruck):
+            graph = self.build_graph(obj)
+            obj.set_graph(graph)
+
+
             prev_state = obj.get_local_state()
             obj.perform_action(action)
             reward, finished, score = obj.calc_score(self.frame_iteration, prev_state)
           if isinstance(obj, Ore):
             if obj.amount < 1:
               self.map[column][row] = None
-              graph = self.build_graph()
               for actor in self.actors:
                 actor.set_data(self.map)
-                # actor.set_ores(ores)
+                graph = self.build_graph(actor)
                 actor.set_graph(graph)
 
 
@@ -101,7 +105,6 @@ class Simulation:
   def init_map(self):
     cell_map = map.GRID
 
-    ores_location = []
     ores = []
     for r in range(GRID_CELLS):
       for c in range(GRID_CELLS):
@@ -113,7 +116,6 @@ class Simulation:
           cell_map[r][c] = Unload(r, c)
         elif cell_map[r][c] == const.GRID_CODE_ORE:
           cell_map[r][c] = Ore(r, c)
-          # ores_location.append(Point(r, c))
           ores.append(cell_map[r][c])
         elif cell_map[r][c] == const.GRID_CODE_TRUCK:
           truck = DumpTruck(r, c)
@@ -121,11 +123,10 @@ class Simulation:
           self.actors.append(truck)
 
     self.map = cell_map
-    graph = self.build_graph()
 
     for actor in self.actors:
       actor.set_data(cell_map)
-      # actor.set_ores(ores)
+      graph = self.build_graph(actor)
       actor.set_graph(graph)
 
     # new_ore = Ore(new_ore_pos.x, new_ore_pos.y)
@@ -173,7 +174,7 @@ class Simulation:
     return coordinates
 
 
-  def build_graph(self):
+  def build_graph(self, for_actor):
     map_graph = Graph()
     for r in range(GRID_CELLS):
       for c in range(GRID_CELLS):
@@ -181,17 +182,21 @@ class Simulation:
 
     for r in range(GRID_CELLS):
       for c in range(GRID_CELLS):
-        if self.map[r][c] and self.map[r][c].get_code() == const.GRID_CODE_ROCK:
+        cell = self.map[r][c]
+        if cell and (cell.get_code() == const.GRID_CODE_ROCK or (cell.get_code() == const.GRID_CODE_TRUCK and r != for_actor.X and c != for_actor.Y)):
+        # if self.map[r][c] and self.map[r][c].get_code() == const.GRID_CODE_ROCK:
           continue
         curr_vertex = str(r) + '.' + str(c)
         right_vertex = str(r) + '.' + str(c + 1) if c < GRID_CELLS - 1 else None
         down_vertex = str(r + 1) + '.' + str(c) if r < GRID_CELLS - 1 else None
         if right_vertex:
-          if self.map[r][c + 1] is None or self.map[r][c + 1].get_code() == const.GRID_CODE_ORE or self.map[r][c + 1].get_code() == const.GRID_CODE_UNLOAD:
+          right_cell = self.map[r][c + 1]
+          if right_cell is None or right_cell.get_code() == const.GRID_CODE_ORE or right_cell.get_code() == const.GRID_CODE_UNLOAD or right_cell.get_code() == const.GRID_CODE_TRUCK:
             map_graph.add_edge(curr_vertex, right_vertex, 1)
 
         if down_vertex:
-          if self.map[r + 1][c] is None or self.map[r + 1][c].get_code() == const.GRID_CODE_ORE or self.map[r + 1][c].get_code() == const.GRID_CODE_UNLOAD:
+          down_cell = self.map[r + 1][c]
+          if down_cell is None or down_cell.get_code() == const.GRID_CODE_ORE or down_cell.get_code() == const.GRID_CODE_UNLOAD or down_cell.get_code() == const.GRID_CODE_TRUCK:
             map_graph.add_edge(curr_vertex, down_vertex, 1)
     return map_graph
 
@@ -218,11 +223,11 @@ class Simulation:
     self.map[new_ore_pos.x][new_ore_pos.y] = new_ore
     self.ores_location = [new_ore_pos]
 
-    graph = self.build_graph()
-    for actor in self.actors:
+    # graph = self.build_graph()
+    # for actor in self.actors:
       # actor.set_ores([new_ore])
       # todo move to any step to handle collisions with other trucks
-      actor.set_graph(graph)
+      # actor.set_graph(graph)
 
 
   def get_actors(self):
