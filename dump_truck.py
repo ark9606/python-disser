@@ -143,7 +143,20 @@ class DumpTruck(Block):
 
     def go_to_ore(self):
       self.aim = const.GRID_CODE_ORE
-      self.go_to_by_algo(self.ores[0])
+      ores_list = []
+      for ore in self.ores:
+        path = self.find_path(self, ore)
+        ores_list.append({'ore': ore, 'path': path})
+
+      ores_list.sort(key=lambda x: len(x['path']))
+      aim_ore = None
+      for ore in ores_list:
+        if ore['ore'].amount >= (100 - self.loaded):
+          aim_ore = ore
+          break
+      print('closest', ores_list[0])
+      self.move_by_path(aim_ore['path'])
+      # self.go_to_by_algo(self.ores[0])
       if len(self.path_to_aim) == 0:
         self.loaded = 100
 
@@ -153,14 +166,23 @@ class DumpTruck(Block):
       if len(self.path_to_aim) == 0:
         self.loaded = 0
 
-    def go_to_by_algo(self, point):
-      vertex_end = str(point.X) + '.' + str(point.Y)
-      vertex_start = str(self.X) + '.' + str(self.Y)
+    def find_path(self, from_point, to_point):
+      vertex_end = str(to_point.X) + '.' + str(to_point.Y)
+      vertex_start = str(from_point.X) + '.' + str(from_point.Y)
       path = self.graph.shortest_path(vertex_start, vertex_end)
       if len(path) < 2:
-        self.path_to_aim = []
-        return
+        return []
+      return path
+
+    def go_to_by_algo(self, point):
+      path = self.find_path(self, point)
       self.path_to_aim = path
+      if len(path) == 0:
+        return
+      self.move_by_path(path)
+
+
+    def move_by_path(self, path):
       next_cell = path[1].split('.')
       next_x = int(next_cell[0])
       next_y = int(next_cell[1])

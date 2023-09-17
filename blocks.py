@@ -42,6 +42,7 @@ class Block:
 class Ore(Block):
     def __init__(self, X, Y):
         Block.__init__(self, X, Y, oreImg, const.GRID_CODE_ORE)
+        self.amount = 500
 
 class Rock(Block):
     def __init__(self, X, Y):
