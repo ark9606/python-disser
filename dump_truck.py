@@ -154,11 +154,13 @@ class DumpTruck(Block):
         if ore['ore'].amount >= (100 - self.loaded):
           aim_ore = ore
           break
-      print('closest', ores_list[0])
-      self.move_by_path(aim_ore['path'])
-      # self.go_to_by_algo(self.ores[0])
+
+      self.path_to_aim = aim_ore['path']
       if len(self.path_to_aim) == 0:
         self.loaded = 100
+        return
+      self.move_by_path(aim_ore['path'])
+
 
     def go_to_unload(self):
       self.aim = const.GRID_CODE_UNLOAD
@@ -177,7 +179,7 @@ class DumpTruck(Block):
     def go_to_by_algo(self, point):
       path = self.find_path(self, point)
       self.path_to_aim = path
-      if len(path) == 0:
+      if len(self.path_to_aim) == 0:
         return
       self.move_by_path(path)
 
