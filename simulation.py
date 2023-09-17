@@ -66,8 +66,8 @@ class Simulation:
           obj = self.map[column][row]
           # print(obj)
           if isinstance(obj, DumpTruck):
-            graph = self.build_graph(obj)
-            obj.set_graph(graph)
+            # graph = self.build_graph(obj)
+            # obj.set_graph(graph)
 
 
             prev_state = obj.get_local_state()
@@ -78,7 +78,7 @@ class Simulation:
               self.map[column][row] = None
               for actor in self.actors:
                 actor.set_data(self.map)
-                graph = self.build_graph(actor)
+                graph = self.build_graph()
                 actor.set_graph(graph)
 
 
@@ -123,10 +123,10 @@ class Simulation:
           self.actors.append(truck)
 
     self.map = cell_map
+    graph = self.build_graph()
 
     for actor in self.actors:
       actor.set_data(cell_map)
-      graph = self.build_graph(actor)
       actor.set_graph(graph)
 
     # new_ore = Ore(new_ore_pos.x, new_ore_pos.y)
@@ -174,7 +174,7 @@ class Simulation:
     return coordinates
 
 
-  def build_graph(self, for_actor):
+  def build_graph(self):
     map_graph = Graph()
     for r in range(GRID_CELLS):
       for c in range(GRID_CELLS):
@@ -183,8 +183,7 @@ class Simulation:
     for r in range(GRID_CELLS):
       for c in range(GRID_CELLS):
         cell = self.map[r][c]
-        if cell and (cell.get_code() == const.GRID_CODE_ROCK or (cell.get_code() == const.GRID_CODE_TRUCK and r != for_actor.X and c != for_actor.Y)):
-        # if self.map[r][c] and self.map[r][c].get_code() == const.GRID_CODE_ROCK:
+        if cell and cell.get_code() == const.GRID_CODE_ROCK:
           continue
         curr_vertex = str(r) + '.' + str(c)
         right_vertex = str(r) + '.' + str(c + 1) if c < GRID_CELLS - 1 else None

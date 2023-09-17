@@ -196,9 +196,9 @@ class DumpTruck(Block):
           self.rotate_to(Turn.LEFT)
         elif next_x > self.X:
           self.rotate_to(Turn.RIGHT)
-        # if next_y < self.Y:
-        #   self.rotate_to(Turn.RIGHT)
-        #   self.rotate_to(Turn.RIGHT)
+        elif next_y > self.Y:
+          self.rotate_to(Turn.RIGHT)
+          self.rotate_to(Turn.RIGHT)
 
       elif self.is_dir_down():
         if next_x < self.X:
@@ -223,7 +223,7 @@ class DumpTruck(Block):
           self.rotate_to(Turn.LEFT)
         elif next_y > self.Y:
           self.rotate_to(Turn.RIGHT)
-        if next_x < self.X:
+        elif next_x < self.X:
           self.rotate_to(Turn.RIGHT)
           self.rotate_to(Turn.RIGHT)
 
