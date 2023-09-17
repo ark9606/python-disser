@@ -156,6 +156,11 @@ class DumpTruck(Block):
           aim_ore = ore
           break
 
+      if not aim_ore:
+        # togo go to base
+        self.aim = const.GRID_CODE_UNLOAD
+        return
+
       self.path_to_aim = aim_ore['path']
       if len(self.path_to_aim) == 0:
         aim_ore['ore'].amount -= 100
@@ -331,6 +336,11 @@ class DumpTruck(Block):
       return [self.loaded, self.path_to_aim, self.aim]
 
     def get_state(self):
+      state = [
+        self.loaded == 100
+      ]
+      return np.array(state, dtype = int)
+
       point_left = Point(self.X - 1, self.Y)
       point_right = Point(self.X + 1, self.Y)
       point_up = Point(self.X, self.Y - 1)
@@ -364,38 +374,37 @@ class DumpTruck(Block):
       ore_down = ore.Y > self.Y
 
       state = [
-        self.loaded == 100
-        # # danger (border) straight
-        # border_straight,
-        #
-        # # danger (border) right
-        # border_right,
-        #
-        # # danger (border) left
-        # border_left,
-        #
-        #
-        # # danger (rock) straight
-        # rock_straight,
-        #
-        # # danger (rock) right
-        # rock_right,
-        #
-        # # danger (rock) left
-        # rock_left,
-        #
-        #
-        # # Move direction
-        # dir_left,
-        # dir_right,
-        # dir_up,
-        # dir_down,
-        #
-        # # Ore location
-        # ore_left,   # ore left
-        # ore_right,   # ore right
-        # ore_up,   # ore up
-        # ore_down,    # ore down
+        # danger (border) straight
+        border_straight,
+
+        # danger (border) right
+        border_right,
+
+        # danger (border) left
+        border_left,
+
+
+        # danger (rock) straight
+        rock_straight,
+
+        # danger (rock) right
+        rock_right,
+
+        # danger (rock) left
+        rock_left,
+
+
+        # Move direction
+        dir_left,
+        dir_right,
+        dir_up,
+        dir_down,
+
+        # Ore location
+        ore_left,   # ore left
+        ore_right,   # ore right
+        ore_up,   # ore up
+        ore_down,    # ore down
       ]
       return np.array(state, dtype = int)
 
