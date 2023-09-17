@@ -91,14 +91,19 @@ class DumpTruck(Block):
 
     def set_data(self, map):
       self.map = map
+      ores = []
       for r in range(len(map)):
         for c in range(len(map[r])):
           if map[r][c] and map[r][c].get_code() == const.GRID_CODE_UNLOAD:
             self.unload = map[r][c]
-            break
-
-    def set_ores(self, ores):
+          if map[r][c] and map[r][c].get_code() == const.GRID_CODE_ORE:
+            ores.append(map[r][c])
       self.ores = ores
+
+            # break
+
+    # def set_ores(self, ores):
+    #   self.ores = ores
 
     def set_graph(self, graph):
       self.graph = graph
@@ -157,6 +162,7 @@ class DumpTruck(Block):
 
       self.path_to_aim = aim_ore['path']
       if len(self.path_to_aim) == 0:
+        aim_ore['ore'].amount -= 100
         self.loaded = 100
         return
       self.move_by_path(aim_ore['path'])

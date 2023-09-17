@@ -19,7 +19,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 30
+SPEED = 15
 
 
 MAP_ORES_COUNT = 1
@@ -68,6 +68,15 @@ class Simulation:
             prev_state = obj.get_local_state()
             obj.perform_action(action)
             reward, finished, score = obj.calc_score(self.frame_iteration, prev_state)
+          if isinstance(obj, Ore):
+            if obj.amount < 1:
+              self.map[column][row] = None
+              graph = self.build_graph()
+              for actor in self.actors:
+                actor.set_data(self.map)
+                # actor.set_ores(ores)
+                actor.set_graph(graph)
+
 
     if finished:
       self.frame_iteration = 0
@@ -104,7 +113,7 @@ class Simulation:
           cell_map[r][c] = Unload(r, c)
         elif cell_map[r][c] == const.GRID_CODE_ORE:
           cell_map[r][c] = Ore(r, c)
-          ores_location.append(Point(r, c))
+          # ores_location.append(Point(r, c))
           ores.append(cell_map[r][c])
         elif cell_map[r][c] == const.GRID_CODE_TRUCK:
           truck = DumpTruck(r, c)
@@ -116,7 +125,7 @@ class Simulation:
 
     for actor in self.actors:
       actor.set_data(cell_map)
-      actor.set_ores(ores)
+      # actor.set_ores(ores)
       actor.set_graph(graph)
 
     # new_ore = Ore(new_ore_pos.x, new_ore_pos.y)
@@ -211,7 +220,7 @@ class Simulation:
 
     graph = self.build_graph()
     for actor in self.actors:
-      actor.set_ores([new_ore])
+      # actor.set_ores([new_ore])
       # todo move to any step to handle collisions with other trucks
       actor.set_graph(graph)
 
