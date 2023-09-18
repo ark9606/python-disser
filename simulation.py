@@ -293,7 +293,7 @@ class Simulation:
       actor = self.actors[i]
       id = self.format_log_cell(actor.id, 4)
       pos = self.format_log_cell(str(actor.X) + '-' + str(actor.Y), 5)
-      aim = self.format_log_cell(actor.get_curr_aim(), 3)
+      aim = self.format_log_cell(actor.get_curr_aim() if actor.get_curr_aim() else '-', 3)
       load = self.format_log_cell(actor.loaded, 4)
       fuel = self.format_log_cell(actor.fuel_cells, 5)
       log.append(f'| {id} | {pos} | {aim} | {load} | {fuel} |')
@@ -304,9 +304,9 @@ class Simulation:
       fuel_used += actor.fuel_used
 
     log.append('')
-    log.append(f' Delivered: {self.unload.amount if self.unload else 0} ')
-    log.append(f' Ticks: {self.ticks} ')
-    log.append(f' Fuel: {fuel_used} ')
+    log.append(f' Delivered: {self.format_log_cell(self.unload.amount if self.unload else 0, 24)} ')
+    log.append(f' Ticks: {self.format_log_cell(self.ticks, 28)} ')
+    log.append(f' Fuel: {self.format_log_cell(fuel_used, 29)} ')
 
     return log
 
