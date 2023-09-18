@@ -79,8 +79,6 @@ class DumpTruck(Block):
         self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
         self.activeState = None
         self.loaded = 0 # percent of load (max 100)
-        # self.brain = FSM()
-        # self.brain.push_state(STATE_GOTO_LOAD)
         self.map = []
         self.ores = []  # ores in all simulation (same as in simulation class)
         self.fuel_stations = []

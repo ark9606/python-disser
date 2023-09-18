@@ -21,7 +21,9 @@ LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
 SPEED = 15
 
-font = pygame.font.Font('freesansbold.ttf', 32)
+font = pygame.font.Font('./static/RobotoMono-Regular.ttf', 16)
+# font2 = pygame.font.Font('./static/RobotoMono-Regular.ttf', 16)
+# font2.underline = True
 
 MAP_ORES_COUNT = 1
 MAP_ROCKS_COUNT = 15
@@ -34,7 +36,7 @@ class Simulation:
     self.clock = pygame.time.Clock()
     self.actors = []
     self.simulation_running = False
-    self.ores_location = [] # ores in all simulation
+    self.ores = [] # ores in all simulation
     self.frame_iteration = 0
     self.map = None
     self.graph = None
@@ -44,7 +46,7 @@ class Simulation:
   def reset(self):
     self.actors = []
     self.simulation_running = False
-    self.ores_location = [] # ores in all simulation
+    self.ores = [] # ores in all simulation
     self.frame_iteration = 0
     # self.map = self.generate_map()
     self.init_map()
@@ -129,15 +131,12 @@ class Simulation:
           self.actors.append(truck)
 
     self.map = cell_map
+    self.ores = ores
     graph = self.build_graph()
 
     for actor in self.actors:
       actor.set_data(cell_map)
       actor.set_graph(graph)
-
-    # new_ore = Ore(new_ore_pos.x, new_ore_pos.y)
-    # self.map[new_ore_pos.x][new_ore_pos.y] = new_ore
-    # self.ores_location = [new_ore_pos]
 
     # for actor in self.actors:
     #   actor.set_ores([new_ore])
@@ -239,6 +238,52 @@ class Simulation:
   def get_actors(self):
     return self.actors
 
+  def format_log_cell(self, value, cell_length):
+    new_value = str(value)
+    return new_value + ' ' * (cell_length - len(new_value))
+
+  def prepare_state_log(self):
+    log = []
+    log.append('|---------------------|')
+    log.append('| Ores                |')
+    log.append('|---------------------|')
+    log.append('| Id | Pos   | Amount |')
+    log.append('|----|-------|--------|')
+
+    for i in range(len(self.ores)):
+      ore = self.ores[i]
+      id = self.format_log_cell(0, 2)
+      pos = self.format_log_cell(str(ore.X) + 'x' + str(ore.Y), 5)
+      amount = self.format_log_cell(ore.amount, 6)
+      log.append(f'| {id} | {pos} | {amount} |')
+      if i == len(self.ores) - 1:
+        log.append('|---------------------|')
+      else:
+        log.append('|----|-------|--------|')
+
+
+    log.append('')
+    log.append('|--------------------------------|')
+    log.append('| Trucks                         |')
+    log.append('|--------------------------------|')
+    log.append('| Id | Pos   | Aim | Load | Fuel |')
+    log.append('|----|-------|-----|------|------|')
+
+    for i in range(len(self.actors)):
+      actor = self.actors[i]
+      id = self.format_log_cell(0, 2)
+      pos = self.format_log_cell(str(actor.X) + 'x' + str(actor.Y), 5)
+      aim = self.format_log_cell(actor.get_curr_aim(), 3)
+      load = self.format_log_cell(actor.loaded, 4)
+      fuel = self.format_log_cell(actor.fuel_cells, 4)
+      log.append(f'| {id} | {pos} | {aim} | {load} | {fuel} |')
+      if i == len(self.actors) - 1:
+        log.append('|--------------------------------|')
+      else:
+        log.append('|----|-------|-----|------|------|')
+
+    return log
+
   def update_ui(self):
     self.display.fill(const.GREY)
     self.draw_grid(GRID_ORIGIN, const.GRID_SIZE, GRID_CELLS)
@@ -246,11 +291,13 @@ class Simulation:
     white = (255, 255, 255)
     green = (0, 255, 0)
     blue = (0, 0, 128)
-    text = font.render('GeeksForGeeks', True, green, blue)
-    text_rect = text.get_rect()
-    text_rect.left = const.LABEL_POSITION[0]
-    text_rect.top = const.LABEL_POSITION[1]
-    self.display.blit(text, text_rect)
+    state_log_list = self.prepare_state_log()
+    for i in range(len(state_log_list)):
+      text = font.render(state_log_list[i], True, (0,0,0), white)
+      text_rect = text.get_rect()
+      text_rect.left = const.LABEL_POSITION[0]
+      text_rect.top = const.LABEL_POSITION[1] + i * text_rect.height
+      self.display.blit(text, text_rect)
     pygame.display.flip()
 
   def draw_objects(self):
