@@ -1,6 +1,7 @@
 import constants as const
 from utils import Point
 import pygame
+import random
 
 GRID_ORIGIN = const.GRID_ORIGIN
 CELL_SIZE = const.CELL_SIZE
@@ -20,6 +21,7 @@ fuelStationImg = pygame.transform.scale(fuelStationImg, (CELL_SIZE, CELL_SIZE))
 
 class Block:
     def __init__(self, X, Y, img, code):
+        self.id = random.randint(1, 1000)
         self.X = X
         self.Y = Y
         self.img = img

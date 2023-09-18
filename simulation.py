@@ -19,11 +19,10 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 15
+SPEED = 5
 
 font = pygame.font.Font('./static/RobotoMono-Regular.ttf', 16)
-# font2 = pygame.font.Font('./static/RobotoMono-Regular.ttf', 16)
-# font2.underline = True
+font2 = pygame.font.Font('./static/RobotoMono-Regular.ttf', 18)
 
 MAP_ORES_COUNT = 1
 MAP_ROCKS_COUNT = 15
@@ -44,6 +43,7 @@ class Simulation:
     self.reset()
     self.unload = None
     self.done = False
+    self.start_btn = None
 
   
   def reset(self):
@@ -60,16 +60,21 @@ class Simulation:
     # self.place_ore()
 
   def make_step(self, action):
-    self.frame_iteration += 1
-    self.ticks = self.ticks if self.done else self.ticks + 1
-    # 1. check user input
-    self.check_input()
-
-
-    # now it works only for one truck, change to accumulate res from different trucks
     reward = 0
     finished = False
     score = 0
+
+    # 1. check user input
+    self.check_input()
+
+    if not self.simulation_running:
+      self.update_ui()
+      self.clock.tick(SPEED)
+      return reward, finished, score
+
+    self.frame_iteration += 1
+    self.ticks = self.ticks if self.done else self.ticks + 1
+
 
     # 2. move (update state of objects)
     for row in range(len(self.map)):
@@ -257,44 +262,45 @@ class Simulation:
 
   def prepare_state_log(self):
     log = []
-    log.append('|---------------------|')
-    log.append('| Ores                |')
-    log.append('|---------------------|')
-    log.append('| Id | Pos   | Amount |')
-    log.append('|----|-------|--------|')
+    log.append('|-----------------------|')
+    log.append('| Ores                  |')
+    log.append('|-----------------------|')
+    log.append('| Id   | Pos   | Amount |')
+    log.append('|------|-------|--------|')
 
     for i in range(len(self.ores)):
       ore = self.ores[i]
-      id = self.format_log_cell(0, 2)
-      pos = self.format_log_cell(str(ore.X) + 'x' + str(ore.Y), 5)
+      id = self.format_log_cell(ore.id, 4)
+      pos = self.format_log_cell(str(ore.X) + '-' + str(ore.Y), 5)
       amount = self.format_log_cell(ore.amount, 6)
       log.append(f'| {id} | {pos} | {amount} |')
       if i == len(self.ores) - 1:
-        log.append('|---------------------|')
+        log.append('|-----------------------|')
       else:
-        log.append('|----|-------|--------|')
+        log.append('|------|-------|--------|')
+
 
 
     log.append('')
-    log.append('|--------------------------------|')
-    log.append('| Trucks                         |')
-    log.append('|--------------------------------|')
-    log.append('| Id | Pos   | Aim | Load | Fuel |')
-    log.append('|----|-------|-----|------|------|')
+    log.append('|-----------------------------------|')
+    log.append('| Trucks                            |')
+    log.append('|-----------------------------------|')
+    log.append('| Id   | Pos   | Aim | Load | Fuel  |')
+    log.append('|------|-------|-----|------|-------|')
 
     fuel_used = 0
     for i in range(len(self.actors)):
       actor = self.actors[i]
-      id = self.format_log_cell(0, 2)
-      pos = self.format_log_cell(str(actor.X) + 'x' + str(actor.Y), 5)
+      id = self.format_log_cell(actor.id, 4)
+      pos = self.format_log_cell(str(actor.X) + '-' + str(actor.Y), 5)
       aim = self.format_log_cell(actor.get_curr_aim(), 3)
       load = self.format_log_cell(actor.loaded, 4)
-      fuel = self.format_log_cell(actor.fuel_cells, 4)
+      fuel = self.format_log_cell(actor.fuel_cells, 5)
       log.append(f'| {id} | {pos} | {aim} | {load} | {fuel} |')
       if i == len(self.actors) - 1:
-        log.append('|--------------------------------|')
+        log.append('|-----------------------------------|')
       else:
-        log.append('|----|-------|-----|------|------|')
+        log.append('|------|-------|-----|------|-------|')
       fuel_used += actor.fuel_used
 
     log.append('')
@@ -318,6 +324,9 @@ class Simulation:
       text_rect.left = const.LABEL_POSITION[0]
       text_rect.top = const.LABEL_POSITION[1] + i * text_rect.height
       self.display.blit(text, text_rect)
+    pause = '        Pause        '
+    start = '        Start        '
+    self.start_btn = button(self.display, const.START_BTN_POSITION, pause if self.simulation_running else start)
     pygame.display.flip()
 
   def draw_objects(self):
@@ -369,7 +378,10 @@ class Simulation:
           self.display, LINE_COLOR,
           (cont_x, cont_y + (cellSize*x)),
           (cont_x + CONTAINER_WIDTH_HEIGHT, cont_y + (cellSize*x)), LINE_WIDTH)
-  
+
+  def on_start_btn_click(self):
+    self.simulation_running = not self.simulation_running
+
   def check_input(self):
     for event in pygame.event.get():
       if event.type == pygame.QUIT or (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)):
@@ -378,5 +390,17 @@ class Simulation:
         sys.exit()
       elif event.type == KEYDOWN and event.key == K_r:
         self.reset()
+      elif event.type == pygame.MOUSEBUTTONDOWN:
+        if self.start_btn.collidepoint(pygame.mouse.get_pos()):
+          self.on_start_btn_click()
 
-
+def button(screen, position, text):
+  text_render = font2.render(text, True, (0, 0, 255))
+  x, y, w, h = text_render.get_rect()
+  x, y = position
+  pygame.draw.line(screen, (230, 230, 230), (x, y), (x + w, y), 5)
+  pygame.draw.line(screen, (230, 230, 230), (x, y - 2), (x, y + h), 5)
+  pygame.draw.line(screen, (150, 150, 150), (x, y + h), (x + w, y + h), 5)
+  pygame.draw.line(screen, (150, 150, 150), (x + w, y + h), [x + w, y], 5)
+  pygame.draw.rect(screen, (200, 200, 200), (x, y, w, h))
+  return screen.blit(text_render, (x, y))  # this is a rect pygame.Rect
