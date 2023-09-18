@@ -21,6 +21,7 @@ LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
 SPEED = 15
 
+font = pygame.font.Font('freesansbold.ttf', 32)
 
 MAP_ORES_COUNT = 1
 MAP_ROCKS_COUNT = 15
@@ -242,6 +243,14 @@ class Simulation:
     self.display.fill(const.GREY)
     self.draw_grid(GRID_ORIGIN, const.GRID_SIZE, GRID_CELLS)
     self.draw_objects()
+    white = (255, 255, 255)
+    green = (0, 255, 0)
+    blue = (0, 0, 128)
+    text = font.render('GeeksForGeeks', True, green, blue)
+    text_rect = text.get_rect()
+    text_rect.left = const.LABEL_POSITION[0]
+    text_rect.top = const.LABEL_POSITION[1]
+    self.display.blit(text, text_rect)
     pygame.display.flip()
 
   def draw_objects(self):
