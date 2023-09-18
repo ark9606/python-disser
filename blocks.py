@@ -64,3 +64,7 @@ class Unload(Block):
 class FuelStation(Block):
     def __init__(self, X, Y):
         Block.__init__(self, X, Y, fuelStationImg, const.GRID_CODE_FUEL)
+        self.trucks_queue = []
+
+    def __repr__(self):
+        return 'fuel(' + str(self.get_code()) + ') <trucks_queue ' + str(len(self.trucks_queue)) + '>'

@@ -19,13 +19,13 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 5
+SPEED = 7
 
 
 MAP_ORES_COUNT = 1
 MAP_ROCKS_COUNT = 15
 MAP_TRUCKS_COUNT = 1
-# TODO: trucks overlap each other -> add queues
+# TODO: check path to next aim if fuel enough for it + path to fuel, then go
 # TODO: improve check for fuel refill - now they return back for refilling
 class Simulation:
   def __init__(self):
@@ -81,7 +81,9 @@ class Simulation:
                 actor.set_data(self.map)
                 graph = self.build_graph()
                 actor.set_graph(graph)
-
+          # if isinstance(obj, FuelStation):
+          #   for actor in self.actors:
+          #     actor.set_data(self.map)
 
     if finished:
       self.frame_iteration = 0

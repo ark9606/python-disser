@@ -173,9 +173,26 @@ class DumpTruck(Block):
 
       self.path_to_aim = aim_fuel_station['path']
       if len(self.path_to_aim) == 0:
+        print('clear_fuel')
         self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
+        self.map[self.X][self.Y].trucks_queue = []
+
+        # todo perform previous action
         return
+
+      [next_x, next_y] = self.get_next_point_from_path(aim_fuel_station['path'])
+      next_cell = self.map[next_x][next_y]
+      print('next_cell', next_cell, 'path_len', len(self.path_to_aim))
+
+      if len(self.path_to_aim) == 2 and next_cell and next_cell.get_code() == const.GRID_CODE_FUEL and len(next_cell.trucks_queue) > 0:
+        print('WAIT')
+        return
+
       self.move_by_path(aim_fuel_station['path'])
+
+      if next_cell and next_cell.get_code() == const.GRID_CODE_FUEL:
+        print('write_fuel')
+        next_cell.trucks_queue = [self]
 
     def go_to_ore(self):
       self.aim = const.GRID_CODE_ORE
@@ -226,10 +243,15 @@ class DumpTruck(Block):
       self.move_by_path(path)
 
 
-    def move_by_path(self, path):
+    def get_next_point_from_path(self, path):
       next_cell = path[1].split('.')
       next_x = int(next_cell[0])
       next_y = int(next_cell[1])
+      return [next_x, next_y]
+
+
+    def move_by_path(self, path):
+      [next_x, next_y] = self.get_next_point_from_path(path)
 
       if self.is_dir_up():
         if next_x < self.X:
