@@ -19,13 +19,14 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 15
+SPEED = 5
 
 
 MAP_ORES_COUNT = 1
 MAP_ROCKS_COUNT = 15
 MAP_TRUCKS_COUNT = 1
-
+# TODO: trucks overlap each other -> add queues
+# TODO: improve check for fuel refill - now they return back for refilling
 class Simulation:
   def __init__(self):
     self.display = pygame.display.set_mode(const.SCREENSIZE)
@@ -178,6 +179,7 @@ class Simulation:
 
 
   def build_graph(self):
+    objects_for_visits = [const.GRID_CODE_ORE, const.GRID_CODE_UNLOAD, const.GRID_CODE_TRUCK, const.GRID_CODE_FUEL]
     map_graph = Graph()
     for r in range(GRID_CELLS):
       for c in range(GRID_CELLS):
@@ -193,12 +195,12 @@ class Simulation:
         down_vertex = str(r + 1) + '.' + str(c) if r < GRID_CELLS - 1 else None
         if right_vertex:
           right_cell = self.map[r][c + 1]
-          if right_cell is None or right_cell.get_code() == const.GRID_CODE_ORE or right_cell.get_code() == const.GRID_CODE_UNLOAD or right_cell.get_code() == const.GRID_CODE_TRUCK:
+          if right_cell is None or right_cell.get_code() in objects_for_visits:
             map_graph.add_edge(curr_vertex, right_vertex, 1)
 
         if down_vertex:
           down_cell = self.map[r + 1][c]
-          if down_cell is None or down_cell.get_code() == const.GRID_CODE_ORE or down_cell.get_code() == const.GRID_CODE_UNLOAD or down_cell.get_code() == const.GRID_CODE_TRUCK:
+          if down_cell is None or down_cell.get_code() in objects_for_visits:
             map_graph.add_edge(curr_vertex, down_vertex, 1)
     return map_graph
 

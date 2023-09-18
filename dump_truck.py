@@ -82,6 +82,7 @@ class DumpTruck(Block):
         # self.brain.push_state(STATE_GOTO_LOAD)
         self.map = []
         self.ores = []  # ores in all simulation (same as in simulation class)
+        self.fuel_stations = []
         self.score = 0
         self.graph = None
         self.unload = None
@@ -92,13 +93,17 @@ class DumpTruck(Block):
     def set_data(self, map):
       self.map = map
       ores = []
+      fuel_stations = []
       for r in range(len(map)):
         for c in range(len(map[r])):
           if map[r][c] and map[r][c].get_code() == const.GRID_CODE_UNLOAD:
             self.unload = map[r][c]
           if map[r][c] and map[r][c].get_code() == const.GRID_CODE_ORE:
             ores.append(map[r][c])
+          if map[r][c] and map[r][c].get_code() == const.GRID_CODE_FUEL:
+            fuel_stations.append(map[r][c])
       self.ores = ores
+      self.fuel_stations = fuel_stations
 
 
     def set_graph(self, graph):
@@ -120,6 +125,9 @@ class DumpTruck(Block):
       # TODO: fuel
       # add fuel station
       # DEPEND ON percent of empty fuel
+      if (self.fuel_cells / TRUCK_DEFAULT_FUEL_CELLS) * 100 <= 30:
+        self.go_to_fuel_station()
+        return
       # increase fuel consumption depending on load
       # calc path & fuel consumption to fuel station DEPENDING ON LOAD
       if self.loaded < 100:
@@ -146,6 +154,28 @@ class DumpTruck(Block):
       # elif np.array_equal(action, [0, 0, 1]):
       #   self.rotate_to(Turn.LEFT)
       #   self.move_forward()
+
+    def go_to_fuel_station(self):
+      self.aim = const.GRID_CODE_FUEL
+      fuel_station_list = []
+      for fuel_station in self.fuel_stations:
+        path = self.find_path(self, fuel_station)
+        fuel_station_list.append({ 'fuel_station': fuel_station, 'path': path })
+
+      fuel_station_list.sort(key=lambda x: len(x['path']))
+      # todo: maybe consider queues on stations and pick nearest with smaller queue
+      aim_fuel_station = fuel_station_list[0]
+
+      if not aim_fuel_station:
+        # togo go to base
+        self.aim = const.GRID_CODE_UNLOAD
+        return
+
+      self.path_to_aim = aim_fuel_station['path']
+      if len(self.path_to_aim) == 0:
+        self.fuel_cells = TRUCK_DEFAULT_FUEL_CELLS
+        return
+      self.move_by_path(aim_fuel_station['path'])
 
     def go_to_ore(self):
       self.aim = const.GRID_CODE_ORE
