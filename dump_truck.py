@@ -13,7 +13,8 @@ GRID_CODE = const.GRID_CODE_TRUCK
 truckImg = pygame.image.load('./static/truck6.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
-TRUCK_DEFAULT_FUEL_CELLS = 100
+TRUCK_DEFAULT_FUEL_CELLS = 150
+TRUCK_FUEL_CONS = 1
 
 
 Point = namedtuple('Point', 'x, y')
@@ -121,18 +122,39 @@ class DumpTruck(Block):
       surf.blit(self.img, (X, Y))
 
     def perform_action(self, action):
-      # print('unload', self.loaded)
-      # TODO: fuel
       # TODO: check path to next aim if fuel enough for it + path to fuel, then go
       # create func for calc fuel consumption based on load
-      # sum: len of path to curr aim + len of path from aim to fuel
-      # calc expected fuel consumption
-      # if enough, go, else go to fuel
+      expected_total_consumption = -1
+      if self.aim and self.aim != const.GRID_CODE_FUEL:
+        # new_aim = self.aim if self.aim else const.GRID_CODE_ORE
+        consumption_before_aim = TRUCK_FUEL_CONS if self.loaded < 100 else TRUCK_FUEL_CONS * 1.5
+        consumption_after_aim = TRUCK_FUEL_CONS if self.aim == const.GRID_CODE_UNLOAD else TRUCK_FUEL_CONS * 1.5
+        path_before_aim = []
+        path_after_aim = []
 
-      if (self.fuel_cells / TRUCK_DEFAULT_FUEL_CELLS) * 100 <= 30:
+        if self.aim == const.GRID_CODE_ORE:
+          nearest_ore = self.find_nearest_ore(self)
+          path_before_aim = nearest_ore['path'] if nearest_ore else []
+          nearest_fuel_station = self.find_nearest_fuel_station(nearest_ore['ore'])
+          path_after_aim = nearest_fuel_station['path'] if nearest_fuel_station else []
+        elif self.aim == const.GRID_CODE_UNLOAD:
+          path_before_aim = self.find_path(self, self.unload)
+          nearest_fuel_station = self.find_nearest_fuel_station(self.unload)
+          path_after_aim = nearest_fuel_station['path'] if nearest_fuel_station else []
+
+        expected_total_consumption = (len(path_before_aim) * consumption_before_aim + len(path_after_aim) * consumption_after_aim) * 1.25
+
+
+
+        # sum: len of path to curr aim + len of path from aim to fuel
+        # calc expected fuel consumption
+        # if enough, go, else go to fuel
+
+      # if (self.fuel_cells / TRUCK_DEFAULT_FUEL_CELLS) * 100 <= 30:
+      if self.fuel_cells < expected_total_consumption:
         self.go_to_fuel_station()
         return
-      if self.loaded < 100:
+      elif self.loaded < 100:
         self.go_to_ore()
       else:
         self.go_to_unload()
@@ -157,16 +179,21 @@ class DumpTruck(Block):
       #   self.rotate_to(Turn.LEFT)
       #   self.move_forward()
 
-    def go_to_fuel_station(self):
-      self.aim = const.GRID_CODE_FUEL
+    def find_nearest_fuel_station(self, from_point):
       fuel_station_list = []
       for fuel_station in self.fuel_stations:
-        path = self.find_path(self, fuel_station)
+        path = self.find_path(from_point, fuel_station)
         fuel_station_list.append({ 'fuel_station': fuel_station, 'path': path })
 
       fuel_station_list.sort(key=lambda x: len(x['path']))
-      # todo: maybe consider queues on stations and pick nearest with smaller queue
-      aim_fuel_station = fuel_station_list[0]
+      if len(fuel_station_list) == 0:
+        return None
+      return fuel_station_list[0]
+
+
+    def go_to_fuel_station(self):
+      self.aim = const.GRID_CODE_FUEL
+      aim_fuel_station = self.find_nearest_fuel_station(self)
 
       if not aim_fuel_station:
         # togo go to base
@@ -196,19 +223,28 @@ class DumpTruck(Block):
         print('write_fuel')
         next_cell.trucks_queue = [self]
 
-    def go_to_ore(self):
-      self.aim = const.GRID_CODE_ORE
+
+    def find_nearest_ore(self, from_point):
       ores_list = []
       for ore in self.ores:
-        path = self.find_path(self, ore)
-        ores_list.append({'ore': ore, 'path': path})
+        path = self.find_path(from_point, ore)
+        ores_list.append({ 'ore': ore, 'path': path })
 
-      ores_list.sort(key = lambda x: len(x['path']))
+      ores_list.sort(key=lambda x: len(x['path']))
       aim_ore = None
       for ore in ores_list:
         if ore['ore'].amount >= (100 - self.loaded):
           aim_ore = ore
           break
+
+      if not aim_ore:
+        return None
+
+      return aim_ore
+
+    def go_to_ore(self):
+      self.aim = const.GRID_CODE_ORE
+      aim_ore = self.find_nearest_ore(self)
 
       if not aim_ore:
         # togo go to base
