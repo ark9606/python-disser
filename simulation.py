@@ -41,12 +41,14 @@ class Simulation:
     self.map = None
     self.graph = None
     self.reset()
+    self.unload = None
 
   
   def reset(self):
     self.actors = []
     self.simulation_running = False
     self.ores = [] # ores in all simulation
+    self.unload = None
     self.frame_iteration = 0
     # self.map = self.generate_map()
     self.init_map()
@@ -67,12 +69,7 @@ class Simulation:
     for row in range(len(self.map)):
       for column in range(len(self.map[row])):
           obj = self.map[column][row]
-          # print(obj)
           if isinstance(obj, DumpTruck):
-            # graph = self.build_graph(obj)
-            # obj.set_graph(graph)
-
-
             prev_state = obj.get_local_state()
             obj.perform_action(action)
             reward, finished, score = obj.calc_score(self.frame_iteration, prev_state)
@@ -83,6 +80,8 @@ class Simulation:
                 actor.set_data(self.map)
                 graph = self.build_graph()
                 actor.set_graph(graph)
+          if isinstance(obj, Unload):
+            self.unload = self.map[column][row]
           # if isinstance(obj, FuelStation):
           #   for actor in self.actors:
           #     actor.set_data(self.map)
@@ -109,7 +108,6 @@ class Simulation:
 
   def init_map(self):
     cell_map = map.GRID
-    # cell_map = np.array(map.GRID).T.tolist()
 
     ores = []
     for r in range(GRID_CELLS):
@@ -120,6 +118,7 @@ class Simulation:
           cell_map[r][c] = Rock(r, c)
         elif cell_map[r][c] == const.GRID_CODE_UNLOAD:
           cell_map[r][c] = Unload(r, c)
+          self.unload = cell_map[r][c]
         elif cell_map[r][c] == const.GRID_CODE_FUEL:
           cell_map[r][c] = FuelStation(r, c)
         elif cell_map[r][c] == const.GRID_CODE_ORE:
@@ -132,6 +131,7 @@ class Simulation:
 
     self.map = cell_map
     self.ores = ores
+    # print('INIT unload', self.unload)
     graph = self.build_graph()
 
     for actor in self.actors:
@@ -281,6 +281,8 @@ class Simulation:
         log.append('|--------------------------------|')
       else:
         log.append('|----|-------|-----|------|------|')
+    log.append('')
+    log.append(f' Delivered: {self.unload.amount if self.unload else 0} ')
 
     return log
 
@@ -293,7 +295,7 @@ class Simulation:
     blue = (0, 0, 128)
     state_log_list = self.prepare_state_log()
     for i in range(len(state_log_list)):
-      text = font.render(state_log_list[i], True, (0,0,0), white)
+      text = font.render(state_log_list[i], True, (0,0,0), const.GREY2)
       text_rect = text.get_rect()
       text_rect.left = const.LABEL_POSITION[0]
       text_rect.top = const.LABEL_POSITION[1] + i * text_rect.height

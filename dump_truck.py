@@ -279,6 +279,8 @@ class DumpTruck(Block):
       self.push_aim(const.GRID_CODE_UNLOAD)
       self.go_to_by_algo(self.unload)
       if len(self.path_to_aim) == 0:
+        self.unload.amount += self.loaded
+        # print('self.unload.amount', self.unload.amount)
         self.loaded = 0
         self.pop_aim()
 

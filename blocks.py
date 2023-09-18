@@ -59,7 +59,7 @@ class Rock(Block):
 class Unload(Block):
     def __init__(self, X, Y):
         Block.__init__(self, X, Y, unloadImg, const.GRID_CODE_UNLOAD)
-
+        self.amount = 0
 
 class FuelStation(Block):
     def __init__(self, X, Y):
