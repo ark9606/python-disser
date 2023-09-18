@@ -13,9 +13,9 @@ GRID_CODE = const.GRID_CODE_TRUCK
 truckImg = pygame.image.load('./static/truck6.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
-# TRUCK_DEFAULT_FUEL_CELLS = 105 # litres - more real
-TRUCK_DEFAULT_FUEL_CELLS = 150 # litres
-TRUCK_FUEL_CONS = 1
+TRUCK_DEFAULT_FUEL_CELLS = 105 # litres - more real
+# TRUCK_DEFAULT_FUEL_CELLS = 150 # litres
+TRUCK_FUEL_CONS = 0.5
 
 
 Point = namedtuple('Point', 'x, y')
@@ -350,8 +350,8 @@ class DumpTruck(Block):
       if self.fuel_cells > 0:
         self.X = next_x
         self.Y = next_y
-        self.fuel_cells -= 1
-        self.fuel_used += 1
+        self.fuel_cells -= TRUCK_FUEL_CONS
+        self.fuel_used += TRUCK_FUEL_CONS
 
 
     def calc_score(self, frame_iteration, prev_state):
@@ -577,19 +577,23 @@ class DumpTruck(Block):
 
     def move_right(self):
       self.X += 1
-      self.fuel_cells -= 1
+      self.fuel_cells -= TRUCK_FUEL_CONS
+      self.fuel_used += TRUCK_FUEL_CONS
 
     def move_left(self):
       self.X -= 1
-      self.fuel_cells -= 1
+      self.fuel_cells -= TRUCK_FUEL_CONS
+      self.fuel_used += TRUCK_FUEL_CONS
 
     def move_up(self):
       self.Y -= 1
-      self.fuel_cells -= 1
+      self.fuel_cells -= TRUCK_FUEL_CONS
+      self.fuel_used += TRUCK_FUEL_CONS
 
     def move_down(self):
       self.Y += 1
-      self.fuel_cells -= 1
+      self.fuel_cells -= TRUCK_FUEL_CONS
+      self.fuel_used += TRUCK_FUEL_CONS
 
     
     def move_forward(self):
