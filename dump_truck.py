@@ -13,7 +13,7 @@ GRID_CODE = const.GRID_CODE_TRUCK
 truckImg = pygame.image.load('./static/truck6.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
-TRUCK_DEFAULT_FUEL_CELLS = 999999
+TRUCK_DEFAULT_FUEL_CELLS = 100
 
 
 Point = namedtuple('Point', 'x, y')
@@ -117,6 +117,11 @@ class DumpTruck(Block):
 
     def perform_action(self, action):
       # print('unload', self.loaded)
+      # TODO: fuel
+      # add fuel station
+      # DEPEND ON percent of empty fuel
+      # increase fuel consumption depending on load
+      # calc path & fuel consumption to fuel station DEPENDING ON LOAD
       if self.loaded < 100:
         self.go_to_ore()
       else:
@@ -232,8 +237,10 @@ class DumpTruck(Block):
           self.rotate_to(Turn.RIGHT)
           self.rotate_to(Turn.RIGHT)
 
-      self.X = next_x
-      self.Y = next_y
+      if self.fuel_cells > 0:
+        self.X = next_x
+        self.Y = next_y
+        self.fuel_cells -= 1
 
 
     def calc_score(self, frame_iteration, prev_state):
@@ -408,7 +415,6 @@ class DumpTruck(Block):
       ]
       return np.array(state, dtype = int)
 
-    # todo: could be extracted for all active transports
     def is_collision(self, point = None):
       if point is None:
         point = Point(self.X, self.Y)

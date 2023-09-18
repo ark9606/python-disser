@@ -5,7 +5,7 @@ from pygame.locals import KEYDOWN, K_q, K_r, K_ESCAPE
 import constants as const
 import map as map
 from dump_truck import DumpTruck
-from blocks import Ore, Rock, Unload
+from blocks import Ore, Rock, Unload, FuelStation
 import time
 
 from graph import Graph
@@ -104,6 +104,7 @@ class Simulation:
 
   def init_map(self):
     cell_map = map.GRID
+    # cell_map = np.array(map.GRID).T.tolist()
 
     ores = []
     for r in range(GRID_CELLS):
@@ -114,6 +115,8 @@ class Simulation:
           cell_map[r][c] = Rock(r, c)
         elif cell_map[r][c] == const.GRID_CODE_UNLOAD:
           cell_map[r][c] = Unload(r, c)
+        elif cell_map[r][c] == const.GRID_CODE_FUEL:
+          cell_map[r][c] = FuelStation(r, c)
         elif cell_map[r][c] == const.GRID_CODE_ORE:
           cell_map[r][c] = Ore(r, c)
           ores.append(cell_map[r][c])

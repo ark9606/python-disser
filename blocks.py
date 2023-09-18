@@ -15,6 +15,9 @@ rockImg = pygame.transform.scale(rockImg, (CELL_SIZE, CELL_SIZE))
 unloadImg = pygame.image.load('./static/unload2.png')
 unloadImg = pygame.transform.scale(unloadImg, (CELL_SIZE, CELL_SIZE))
 
+fuelStationImg = pygame.image.load('./static/gas-station.png')
+fuelStationImg = pygame.transform.scale(fuelStationImg, (CELL_SIZE, CELL_SIZE))
+
 class Block:
     def __init__(self, X, Y, img, code):
         self.X = X
@@ -52,6 +55,12 @@ class Rock(Block):
     def __init__(self, X, Y):
         Block.__init__(self, X, Y, rockImg, const.GRID_CODE_ROCK)
 
+
 class Unload(Block):
     def __init__(self, X, Y):
         Block.__init__(self, X, Y, unloadImg, const.GRID_CODE_UNLOAD)
+
+
+class FuelStation(Block):
+    def __init__(self, X, Y):
+        Block.__init__(self, X, Y, fuelStationImg, const.GRID_CODE_FUEL)
