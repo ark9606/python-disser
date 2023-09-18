@@ -123,13 +123,15 @@ class DumpTruck(Block):
     def perform_action(self, action):
       # print('unload', self.loaded)
       # TODO: fuel
-      # add fuel station
-      # DEPEND ON percent of empty fuel
+      # TODO: check path to next aim if fuel enough for it + path to fuel, then go
+      # create func for calc fuel consumption based on load
+      # sum: len of path to curr aim + len of path from aim to fuel
+      # calc expected fuel consumption
+      # if enough, go, else go to fuel
+
       if (self.fuel_cells / TRUCK_DEFAULT_FUEL_CELLS) * 100 <= 30:
         self.go_to_fuel_station()
         return
-      # increase fuel consumption depending on load
-      # calc path & fuel consumption to fuel station DEPENDING ON LOAD
       if self.loaded < 100:
         self.go_to_ore()
       else:

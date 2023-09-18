@@ -25,7 +25,6 @@ SPEED = 7
 MAP_ORES_COUNT = 1
 MAP_ROCKS_COUNT = 15
 MAP_TRUCKS_COUNT = 1
-# TODO: check path to next aim if fuel enough for it + path to fuel, then go
 # TODO: improve check for fuel refill - now they return back for refilling
 class Simulation:
   def __init__(self):
