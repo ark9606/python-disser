@@ -88,7 +88,7 @@ class DumpTruck(Block):
         self.graph = None
         self.unload = None
         self.path_to_aim = []
-        self.aim = None
+        self.aim = []
 
 
     def set_data(self, map):
@@ -121,43 +121,57 @@ class DumpTruck(Block):
       Y = GRID_ORIGIN[1] + (CELL_SIZE * self.Y)
       surf.blit(self.img, (X, Y))
 
+    def get_curr_aim(self):
+      return self.aim[-1] if len(self.aim) > 0 else None
+
+    def push_aim(self, new_aim):
+        current_aim = self.get_curr_aim()
+        if current_aim != new_aim:
+            self.aim.append(new_aim)
+
+    def pop_aim(self):
+        return self.aim.pop()
+
     def perform_action(self, action):
-      # TODO: check path to next aim if fuel enough for it + path to fuel, then go
-      # create func for calc fuel consumption based on load
-      expected_total_consumption = -1
-      if self.aim and self.aim != const.GRID_CODE_FUEL:
-        # new_aim = self.aim if self.aim else const.GRID_CODE_ORE
+      # refill_fuel = False
+      curr_aim = self.get_curr_aim()
+      if curr_aim and curr_aim != const.GRID_CODE_FUEL:
         consumption_before_aim = TRUCK_FUEL_CONS if self.loaded < 100 else TRUCK_FUEL_CONS * 1.5
-        consumption_after_aim = TRUCK_FUEL_CONS if self.aim == const.GRID_CODE_UNLOAD else TRUCK_FUEL_CONS * 1.5
+        consumption_after_aim = TRUCK_FUEL_CONS if curr_aim == const.GRID_CODE_UNLOAD else TRUCK_FUEL_CONS * 1.5
         path_before_aim = []
         path_after_aim = []
 
-        if self.aim == const.GRID_CODE_ORE:
+        if curr_aim == const.GRID_CODE_ORE:
           nearest_ore = self.find_nearest_ore(self)
           path_before_aim = nearest_ore['path'] if nearest_ore else []
-          nearest_fuel_station = self.find_nearest_fuel_station(nearest_ore['ore'])
-          path_after_aim = nearest_fuel_station['path'] if nearest_fuel_station else []
-        elif self.aim == const.GRID_CODE_UNLOAD:
+          if nearest_ore:
+            nearest_fuel_station = self.find_nearest_fuel_station(nearest_ore['ore'])
+            path_after_aim = nearest_fuel_station['path'] if nearest_fuel_station else []
+        elif curr_aim == const.GRID_CODE_UNLOAD:
           path_before_aim = self.find_path(self, self.unload)
           nearest_fuel_station = self.find_nearest_fuel_station(self.unload)
           path_after_aim = nearest_fuel_station['path'] if nearest_fuel_station else []
 
         expected_total_consumption = (len(path_before_aim) * consumption_before_aim + len(path_after_aim) * consumption_after_aim) * 1.25
+        # refill_fuel = True if self.fuel_cells < expected_total_consumption else False
+        # self.aim = const.GRID_CODE_FUEL if self.fuel_cells < expected_total_consumption else self.aim
+        if self.fuel_cells < expected_total_consumption:
+          self.push_aim(const.GRID_CODE_FUEL)
 
 
-
-        # sum: len of path to curr aim + len of path from aim to fuel
-        # calc expected fuel consumption
-        # if enough, go, else go to fuel
 
       # if (self.fuel_cells / TRUCK_DEFAULT_FUEL_CELLS) * 100 <= 30:
-      if self.fuel_cells < expected_total_consumption:
+      # if self.aim == const.GRID_CODE_FUEL:
+      # if refill_fuel or self.aim == const.GRID_CODE_FUEL:
+      if self.get_curr_aim() == const.GRID_CODE_FUEL:
         self.go_to_fuel_station()
         return
-      elif self.loaded < 100:
+      if self.loaded < 100:
         self.go_to_ore()
       else:
         self.go_to_unload()
+
+
 
 
       # if np.array_equal(action, [1, 0, 0]):
@@ -192,12 +206,14 @@ class DumpTruck(Block):
 
 
     def go_to_fuel_station(self):
-      self.aim = const.GRID_CODE_FUEL
+      # self.aim = const.GRID_CODE_FUEL
       aim_fuel_station = self.find_nearest_fuel_station(self)
 
       if not aim_fuel_station:
         # togo go to base
-        self.aim = const.GRID_CODE_UNLOAD
+        # self.aim = const.GRID_CODE_UNLOAD
+        self.pop_aim()
+        self.push_aim(const.GRID_CODE_UNLOAD)
         return
 
       self.path_to_aim = aim_fuel_station['path']
@@ -207,6 +223,7 @@ class DumpTruck(Block):
         self.map[self.X][self.Y].trucks_queue = []
 
         # todo perform previous action
+        self.pop_aim()
         return
 
       [next_x, next_y] = self.get_next_point_from_path(aim_fuel_station['path'])
@@ -243,12 +260,13 @@ class DumpTruck(Block):
       return aim_ore
 
     def go_to_ore(self):
-      self.aim = const.GRID_CODE_ORE
+      self.push_aim(const.GRID_CODE_ORE)
       aim_ore = self.find_nearest_ore(self)
 
       if not aim_ore:
         # togo go to base
-        self.aim = const.GRID_CODE_UNLOAD
+        self.pop_aim()
+        self.push_aim(const.GRID_CODE_UNLOAD)
         return
 
       self.path_to_aim = aim_ore['path']
@@ -260,10 +278,11 @@ class DumpTruck(Block):
 
 
     def go_to_unload(self):
-      self.aim = const.GRID_CODE_UNLOAD
+      self.push_aim(const.GRID_CODE_UNLOAD)
       self.go_to_by_algo(self.unload)
       if len(self.path_to_aim) == 0:
         self.loaded = 0
+        self.pop_aim()
 
     def find_path(self, from_point, to_point):
       vertex_end = str(to_point.X) + '.' + str(to_point.Y)
