@@ -38,10 +38,12 @@ class Simulation:
     self.simulation_running = False
     self.ores = [] # ores in all simulation
     self.frame_iteration = 0
+    self.ticks = 0
     self.map = None
     self.graph = None
     self.reset()
     self.unload = None
+    self.done = False
 
   
   def reset(self):
@@ -50,12 +52,16 @@ class Simulation:
     self.ores = [] # ores in all simulation
     self.unload = None
     self.frame_iteration = 0
+    self.ticks = 0
     # self.map = self.generate_map()
     self.init_map()
+    self.done = False
+
     # self.place_ore()
 
   def make_step(self, action):
     self.frame_iteration += 1
+    self.ticks = self.ticks if self.done else self.ticks + 1
     # 1. check user input
     self.check_input()
 
@@ -85,6 +91,13 @@ class Simulation:
           # if isinstance(obj, FuelStation):
           #   for actor in self.actors:
           #     actor.set_data(self.map)
+
+    all_ores_empty = True
+    for ore in self.ores:
+      if ore.amount > 0:
+        all_ores_empty = False
+    if all_ores_empty:
+      self.done = True
 
     if finished:
       self.frame_iteration = 0
@@ -269,6 +282,7 @@ class Simulation:
     log.append('| Id | Pos   | Aim | Load | Fuel |')
     log.append('|----|-------|-----|------|------|')
 
+    fuel_used = 0
     for i in range(len(self.actors)):
       actor = self.actors[i]
       id = self.format_log_cell(0, 2)
@@ -281,8 +295,12 @@ class Simulation:
         log.append('|--------------------------------|')
       else:
         log.append('|----|-------|-----|------|------|')
+      fuel_used += actor.fuel_used
+
     log.append('')
     log.append(f' Delivered: {self.unload.amount if self.unload else 0} ')
+    log.append(f' Ticks: {self.ticks} ')
+    log.append(f' Fuel: {fuel_used} ')
 
     return log
 

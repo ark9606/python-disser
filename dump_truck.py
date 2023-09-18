@@ -13,7 +13,8 @@ GRID_CODE = const.GRID_CODE_TRUCK
 truckImg = pygame.image.load('./static/truck6.png')
 truckImg = pygame.transform.scale(truckImg, (CELL_SIZE, CELL_SIZE))
 
-TRUCK_DEFAULT_FUEL_CELLS = 150
+# TRUCK_DEFAULT_FUEL_CELLS = 105 # litres - more real
+TRUCK_DEFAULT_FUEL_CELLS = 150 # litres
 TRUCK_FUEL_CONS = 1
 
 
@@ -87,6 +88,7 @@ class DumpTruck(Block):
         self.unload = None
         self.path_to_aim = []
         self.aim = []
+        self.fuel_used = 0
 
 
     def set_data(self, map):
@@ -280,7 +282,6 @@ class DumpTruck(Block):
       self.go_to_by_algo(self.unload)
       if len(self.path_to_aim) == 0:
         self.unload.amount += self.loaded
-        # print('self.unload.amount', self.unload.amount)
         self.loaded = 0
         self.pop_aim()
 
@@ -350,6 +351,7 @@ class DumpTruck(Block):
         self.X = next_x
         self.Y = next_y
         self.fuel_cells -= 1
+        self.fuel_used += 1
 
 
     def calc_score(self, frame_iteration, prev_state):
