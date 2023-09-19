@@ -27,7 +27,7 @@ font2 = pygame.font.Font('./static/RobotoMono-Regular.ttf', 18)
 MAP_ORES_COUNT = 1
 MAP_ROCKS_COUNT = 15
 MAP_TRUCKS_COUNT = 1
-# TODO: improve check for fuel refill - now they return back for refilling
+
 class Simulation:
   def __init__(self):
     self.display = pygame.display.set_mode(const.SCREENSIZE)
