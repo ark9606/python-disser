@@ -19,7 +19,7 @@ CELL_SIZE = const.CELL_SIZE
 
 LINE_WIDTH = const.LINE_WIDTH
 LINE_COLOR = const.LINE_COLOR
-SPEED = 5
+SPEED = 6
 
 font = pygame.font.Font('./static/RobotoMono-Regular.ttf', 16)
 font2 = pygame.font.Font('./static/RobotoMono-Regular.ttf', 18)
